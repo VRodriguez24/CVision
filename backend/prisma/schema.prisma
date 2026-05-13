@@ -116,13 +116,15 @@ model User {
   profile        UserProfile?
   consents       UserConsent[]
   refreshTokens  RefreshToken[]
+  emailTokens    EmailVerificationToken[]
+  passwordTokens PasswordResetToken[]
   cvs            CV[]
   aiRuns         AiRun[]
   notifications  Notification[]
-  auditLogs      AuditLog[]     @relation("ActorAuditLogs")
-  fileAssets     FileAsset[]    @relation("UserFileAssets")
+  auditLogs      AuditLog[]               @relation("ActorAuditLogs")
+  fileAssets     FileAsset[]              @relation("UserFileAssets")
   metricEvents   MetricEvent[]
-  createdPrompts AiPrompt[]     @relation("PromptCreator")
+  createdPrompts AiPrompt[]               @relation("PromptCreator")
 
   @@index([role])
   @@index([status])
@@ -169,6 +171,34 @@ model RefreshToken {
   tokenHash String    @unique @db.VarChar(255)
   expiresAt DateTime
   revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique @db.VarChar(255)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique @db.VarChar(255)
+  expiresAt DateTime
+  usedAt    DateTime?
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

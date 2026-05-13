@@ -11,6 +11,7 @@ import {
   WandSparkles,
 } from 'lucide-react';
 import { Badge, Button, Card, ProgressBar } from '../../components/ui/index.js';
+import { useAuth } from '../../context/index.js';
 
 const cvActions = [
   { label: 'Editar', icon: Pencil },
@@ -215,14 +216,18 @@ function ProUpgradeCard() {
 }
 
 export function DashboardPage() {
+  const { user } = useAuth();
+  const firstName = user?.name?.split(' ')?.[0] ?? 'Usuario';
+  const targetRole = user?.profile?.targetRole || 'Ingeniero de Software Senior';
+
   return (
     <div className="mx-auto max-w-[1180px] pl-0 pr-8">
       <section className="mb-7">
         <h2 className="font-heading text-headline-lg-mobile font-semibold text-primary md:text-[34px] md:leading-tight">
-          Hola, Juan Carlos
+          Hola, {firstName}
         </h2>
         <p className="mt-1 text-body-md text-on-surface-variant">
-          Tu perfil profesional está ganando impulso. Revisa tus últimas actualizaciones.
+          Tu perfil {targetRole ? `para ${targetRole}` : 'profesional'} está ganando impulso. Revisa tus últimas actualizaciones.
         </p>
       </section>
 

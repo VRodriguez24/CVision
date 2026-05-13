@@ -89,10 +89,13 @@ export function Sidebar({
   items = defaultSidebarItems,
   secondaryItems = defaultSidebarSecondaryItems,
   cta,
+  showAdmin = false,
   isOpen = false,
   onClose,
   className,
 }) {
+  const visibleSecondaryItems = secondaryItems.filter((item) => item.icon !== 'admin' || showAdmin);
+
   const sidebarContent = (
     <div className="flex h-full flex-col">
       <div className="mb-8 flex items-start justify-center gap-4 px-3 pt-7">
@@ -126,7 +129,7 @@ export function Sidebar({
           </div>
         ) : null}
         <nav aria-label="Navegación secundaria" className="space-y-2">
-          {secondaryItems.map((item) => (
+          {visibleSecondaryItems.map((item) => (
             <SidebarLink key={item.to} item={item} onNavigate={onClose} />
           ))}
         </nav>

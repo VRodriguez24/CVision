@@ -2,7 +2,10 @@ import { env } from './env.js';
 
 export const corsOptions = {
   origin(origin, callback) {
-    if (!origin || env.CORS_ORIGIN.split(',').map((item) => item.trim()).includes(origin)) {
+    const allowedOrigins = env.CORS_ORIGIN.split(',').map((item) => item.trim());
+    const isLocalViteDev = env.NODE_ENV === 'development' && /^http:\/\/localhost:51\d{2}$/.test(origin ?? '');
+
+    if (!origin || allowedOrigins.includes(origin) || isLocalViteDev) {
       callback(null, true);
       return;
     }

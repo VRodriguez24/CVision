@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { AuthDivider, AuthField, SocialAuthButtons } from '../../components/auth/index.js';
 import { Button } from '../../components/ui/Button.jsx';
+import { useAuth } from '../../context/index.js';
 
 function validateRegister(values) {
   const errors = {};
@@ -18,6 +20,8 @@ function validateRegister(values) {
 
   if (values.password.length < 8) {
     errors.password = 'Usa al menos 8 caracteres.';
+  } else if (!/[a-z]/.test(values.password) || !/[A-Z]/.test(values.password) || !/\d/.test(values.password)) {
+    errors.password = 'Incluye mayúscula, minúscula y número.';
   }
 
   if (values.confirmPassword !== values.password) {
@@ -32,6 +36,8 @@ function validateRegister(values) {
 }
 
 export function RegisterPage() {
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [values, setValues] = useState({
     name: '',
     email: '',
@@ -40,11 +46,12 @@ export function RegisterPage() {
     acceptTerms: false,
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const passwordChecks = [
     { label: '8 caracteres mínimo', valid: values.password.length >= 8 },
-    { label: 'Incluye letras y números', valid: /[a-zA-Z]/.test(values.password) && /\d/.test(values.password) },
+    { label: 'Incluye mayúscula, minúscula y número', valid: /[a-z]/.test(values.password) && /[A-Z]/.test(values.password) && /\d/.test(values.password) },
   ];
 
   function updateField(field, value) {
@@ -52,7 +59,7 @@ export function RegisterPage() {
     setErrors((current) => ({ ...current, [field]: undefined, form: undefined }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = validateRegister(values);
 
@@ -61,7 +68,28 @@ export function RegisterPage() {
       return;
     }
 
-    setErrors({ form: 'Registro preparado. La creación de cuenta se conectará a la API en la siguiente etapa.' });
+    setIsSubmitting(true);
+
+    try {
+      await signUp({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        acceptedTerms: values.acceptTerms,
+        acceptedPrivacy: values.acceptTerms,
+        acceptedAiProcessing: values.acceptTerms,
+      });
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      const message =
+        error.code === 'EMAIL_ALREADY_EXISTS'
+          ? 'Ya existe una cuenta con este email.'
+          : 'No pudimos crear la cuenta. Revisa los datos e intenta nuevamente.';
+
+      setErrors({ form: message });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -152,8 +180,8 @@ export function RegisterPage() {
           </div>
         ) : null}
 
-        <Button type="submit" className="btn-hero-arrow h-12 w-full rounded">
-          Crear cuenta
+        <Button type="submit" disabled={isSubmitting} className="btn-hero-arrow h-12 w-full rounded">
+          {isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}
           <ArrowRight aria-hidden="true" size={18} />
         </Button>
       </form>

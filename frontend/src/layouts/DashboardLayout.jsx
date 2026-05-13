@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { InstitutionalFooter, Sidebar, Topbar } from '../components/navigation/index.js';
-
-const defaultUser = {
-  name: 'Usuario CVision',
-  role: 'Chile Employment Portal',
-  initials: 'CV',
-};
+import { useAuth } from '../context/index.js';
 
 const defaultCreateCta = {
   label: 'Create New CV',
@@ -14,11 +9,21 @@ const defaultCreateCta = {
   to: '/dashboard/cvs/new',
 };
 
-const adminUser = {
-  name: 'Admin SENCE',
-  role: 'Global Moderator',
-  initials: 'AS',
-};
+function getInitials(name = 'CVision') {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+}
+
+function getRoleLabel(role) {
+  if (role === 'ADMIN') return 'Administrador institucional';
+  if (role === 'MODERATOR') return 'Moderador institucional';
+  return 'Perfil profesional';
+}
 
 export function DashboardLayout({
   title,
@@ -30,11 +35,18 @@ export function DashboardLayout({
   footerProps,
   children,
 }) {
+  const { user: authUser } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/dashboard/admin');
   const resolvedTitle = title ?? (isAdmin ? 'Admin Overview' : 'Dashboard');
-  const resolvedUser = user ?? (isAdmin ? adminUser : defaultUser);
+  const resolvedUser = user ?? {
+    name: authUser?.name ?? 'Usuario CVision',
+    role: getRoleLabel(authUser?.role),
+    initials: getInitials(authUser?.name),
+    image: authUser?.profile?.avatarUrl,
+  };
+  const canAccessAdmin = ['ADMIN', 'MODERATOR'].includes(authUser?.role);
   const resolvedFooterProps = {
     ...(isAdmin
       ? {
@@ -50,6 +62,7 @@ export function DashboardLayout({
         items={navigationItems}
         secondaryItems={secondaryNavigationItems}
         cta={createCta}
+        showAdmin={canAccessAdmin}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />

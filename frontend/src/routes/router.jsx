@@ -7,8 +7,10 @@ import { LoginPage } from '../pages/auth/LoginPage.jsx';
 import { RecoverPasswordPage } from '../pages/auth/RecoverPasswordPage.jsx';
 import { RegisterPage } from '../pages/auth/RegisterPage.jsx';
 import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage.jsx';
+import { ComingSoonPage } from '../pages/dashboard/ComingSoonPage.jsx';
 import { DashboardPage } from '../pages/dashboard/DashboardPage.jsx';
 import { LandingFooterLogos, LandingPage } from '../pages/LandingPage.jsx';
+import { ProtectedRoute } from './ProtectedRoute.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -50,15 +52,47 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <DashboardLayout />,
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,
             element: <DashboardPage />,
           },
           {
+            path: 'cvs',
+            element: <ComingSoonPage />,
+          },
+          {
+            path: 'cvs/new',
+            element: <ComingSoonPage />,
+          },
+          {
+            path: 'optimizer',
+            element: <ComingSoonPage />,
+          },
+          {
+            path: 'jobs',
+            element: <ComingSoonPage />,
+          },
+          {
+            path: 'settings',
+            element: <ComingSoonPage />,
+          },
+          {
             path: 'admin',
-            element: <AdminDashboardPage />,
+            element: (
+              <ProtectedRoute roles={['ADMIN', 'MODERATOR']}>
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'help',
+            element: <ComingSoonPage />,
           },
         ],
       },

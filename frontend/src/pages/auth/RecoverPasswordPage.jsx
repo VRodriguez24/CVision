@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Mail } from 'lucide-react';
 import { AuthField } from '../../components/auth/index.js';
 import { Button } from '../../components/ui/Button.jsx';
+import { forgotPassword } from '../../services/authService.js';
 
 function validateRecover(values) {
   if (!values.email) {
@@ -19,9 +20,10 @@ function validateRecover(values) {
 export function RecoverPasswordPage() {
   const [values, setValues] = useState({ email: '' });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = validateRecover(values);
 
@@ -31,8 +33,18 @@ export function RecoverPasswordPage() {
       return;
     }
 
-    setErrors({});
-    setSent(true);
+    setIsSubmitting(true);
+
+    try {
+      await forgotPassword(values.email);
+      setErrors({});
+      setSent(true);
+    } catch {
+      setSent(false);
+      setErrors({ form: 'No pudimos iniciar la recuperación. Intenta nuevamente en unos minutos.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -68,8 +80,14 @@ export function RecoverPasswordPage() {
           </div>
         ) : null}
 
-        <Button type="submit" className="btn-hero-arrow h-12 w-full rounded">
-          Enviar instrucciones
+        {errors.form ? (
+          <div className="rounded border border-error-container bg-error-container px-4 py-3 text-body-sm text-on-error-container">
+            {errors.form}
+          </div>
+        ) : null}
+
+        <Button type="submit" disabled={isSubmitting} className="btn-hero-arrow h-12 w-full rounded">
+          {isSubmitting ? 'Enviando...' : 'Enviar instrucciones'}
           <ArrowRight aria-hidden="true" size={18} />
         </Button>
       </form>
