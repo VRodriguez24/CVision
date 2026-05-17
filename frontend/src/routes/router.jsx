@@ -8,7 +8,7 @@ import { RecoverPasswordPage } from '../pages/auth/RecoverPasswordPage.jsx';
 import { RegisterPage } from '../pages/auth/RegisterPage.jsx';
 import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage.jsx';
 import { ComingSoonPage } from '../pages/dashboard/ComingSoonPage.jsx';
-import { DashboardPage } from '../pages/dashboard/DashboardPage.jsx';
+import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx';
 import { LandingFooterLogos, LandingPage } from '../pages/LandingPage.jsx';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
 
