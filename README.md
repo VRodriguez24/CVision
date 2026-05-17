@@ -48,3 +48,7 @@ npm install
 docker compose up -d # levantar contenedor BDD
 npm run start
 ```
+
+## Créditos
+
+- El motor de renderizado de PDF con `yaml` y **Typst** fue obtenido de [github.com/kirlts/YaCV](https://github.com/kirlts/YaCV)
