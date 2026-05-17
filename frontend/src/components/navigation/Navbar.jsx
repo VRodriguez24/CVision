@@ -55,10 +55,10 @@ export function Navbar({
           {onSidebarToggle ? (
             <Button
               variant="ghost"
-              size="sm"
+              size="m"
               aria-label={isSidebarVisible ? 'Ocultar navegación' : 'Mostrar navegación'}
               onClick={onSidebarToggle}
-              className="hidden h-10 w-10 px-1 lg:inline-flex"
+              className="hidden h-10 w-10 px-0 lg:inline-flex"
             >
               {isSidebarVisible ? <PanelLeftClose aria-hidden="true" size={18} /> : <PanelLeftOpen aria-hidden="true" size={18} />}
             </Button>
@@ -72,7 +72,7 @@ export function Navbar({
         <div className="flex shrink-0 items-center gap-4">
           {actions ? <div className="hidden items-center gap-3 md:flex">{actions}</div> : null}
           {showNotifications ? (
-            <Button variant="ghost" size="sm" aria-label="Notificaciones" className="h-10 w-10 px-0">
+            <Button variant="ghost" size="m" aria-label="Notificaciones" className="h-10 w-10 px-0">
               <Bell aria-hidden="true" size={20} />
             </Button>
           ) : null}
