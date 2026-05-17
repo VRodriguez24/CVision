@@ -1,4 +1,4 @@
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
 import { cn } from '../../utils/cn.js';
 
@@ -13,7 +13,7 @@ function UserAvatar({ user }) {
     <div className="flex items-center gap-3">
       <div className="hidden text-right leading-tight sm:block">
         <p className="font-heading text-label-md text-on-surface">{user.name}</p>
-          {user.role ? <p className="text-[12px] leading-tight text-on-surface-variant">{user.role}</p> : null}
+        {user.role ? <p className="text-[12px] leading-tight text-on-surface-variant">{user.role}</p> : null}
       </div>
       {user.image ? (
         <img
@@ -35,6 +35,8 @@ export function Navbar({
   actions,
   user,
   showNotifications = true,
+  isSidebarVisible = true,
+  onSidebarToggle,
   onMenuClick,
   className,
 }) {
@@ -50,6 +52,17 @@ export function Navbar({
           <Button variant="ghost" size="sm" aria-label="Abrir navegación" onClick={onMenuClick} className="h-10 w-10 px-0 lg:hidden">
             <Menu aria-hidden="true" size={18} />
           </Button>
+          {onSidebarToggle ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label={isSidebarVisible ? 'Ocultar navegación' : 'Mostrar navegación'}
+              onClick={onSidebarToggle}
+              className="hidden h-10 w-10 px-1 lg:inline-flex"
+            >
+              {isSidebarVisible ? <PanelLeftClose aria-hidden="true" size={18} /> : <PanelLeftOpen aria-hidden="true" size={18} />}
+            </Button>
+          ) : null}
           <div className="min-w-0">
             <h1 className="truncate font-heading text-headline-md font-semibold text-on-surface md:text-[26px] md:leading-tight">
               {title}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { InstitutionalFooter, Sidebar, Topbar } from '../components/navigation/index.js';
 import { useAuth } from '../context/index.js';
+import { cn } from '../utils/cn.js';
 
 const defaultCreateCta = {
   label: 'Create New CV',
@@ -37,6 +38,7 @@ export function DashboardLayout({
 }) {
   const { user: authUser } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/dashboard/admin');
   const resolvedTitle = title ?? (isAdmin ? 'Admin Overview' : 'Dashboard');
@@ -63,12 +65,20 @@ export function DashboardLayout({
         secondaryItems={secondaryNavigationItems}
         cta={createCta}
         showAdmin={canAccessAdmin}
+        isDesktopVisible={isSidebarVisible}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex min-h-screen min-w-0 flex-col lg:pl-[160px]">
-        <Topbar title={resolvedTitle} actions={actions} user={resolvedUser} onMenuClick={() => setIsSidebarOpen(true)} />
+      <div className={cn('flex min-h-screen min-w-0 flex-col', isSidebarVisible ? 'lg:pl-[160px]' : 'lg:pl-0')}>
+        <Topbar
+          title={resolvedTitle}
+          actions={actions}
+          user={resolvedUser}
+          isSidebarVisible={isSidebarVisible}
+          onSidebarToggle={() => setIsSidebarVisible((currentValue) => !currentValue)}
+          onMenuClick={() => setIsSidebarOpen(true)}
+        />
         <main className="w-full flex-1 bg-background px-margin-mobile py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] md:px-gutter lg:px-8">
           {children || <Outlet />}
         </main>

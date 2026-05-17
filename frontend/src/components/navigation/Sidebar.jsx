@@ -26,8 +26,8 @@ const iconMap = {
 export const defaultSidebarItems = [
   { label: 'Dashboard', to: '/dashboard', icon: 'dashboard', end: true },
   { label: 'My CVs', to: '/dashboard/cvs', icon: 'cvs' },
-  { label: 'AI Optimizer', to: '/dashboard/optimizer', icon: 'optimizer' },
-  { label: 'Job Matches', to: '/dashboard/jobs', icon: 'jobs' },
+  // { label: 'AI Optimizer', to: '/dashboard/optimizer', icon: 'optimizer' },
+  // { label: 'Job Matches', to: '/dashboard/jobs', icon: 'jobs' },
   { label: 'Settings', to: '/dashboard/settings', icon: 'settings' },
 ];
 
@@ -90,6 +90,7 @@ export function Sidebar({
   secondaryItems = defaultSidebarSecondaryItems,
   cta,
   showAdmin = false,
+  isDesktopVisible = true,
   isOpen = false,
   onClose,
   className,
@@ -115,7 +116,7 @@ export function Sidebar({
 
       <div className="mt-auto px-3 pb-6">
         <div className="mb-5 border-t border-outline-variant" />
-        {cta ? (
+        {/* {cta ? (
           <div className="mb-5">
             <Button
               as={cta.to ? NavLink : 'button'}
@@ -127,7 +128,7 @@ export function Sidebar({
               {cta.shortLabel || cta.label}
             </Button>
           </div>
-        ) : null}
+        ) : null} */}
         <nav aria-label="Navegación secundaria" className="space-y-2">
           {visibleSecondaryItems.map((item) => (
             <SidebarLink key={item.to} item={item} onNavigate={onClose} />
@@ -141,7 +142,8 @@ export function Sidebar({
     <>
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 hidden w-[160px] border-r border-outline-variant bg-surface-container-low text-on-surface lg:block',
+          'fixed inset-y-0 left-0 z-40 hidden w-[160px] border-r border-outline-variant bg-surface-container-low text-on-surface',
+          isDesktopVisible ? 'lg:block' : 'lg:hidden',
           className,
         )}
       >
