@@ -12,12 +12,39 @@ CVision/
 
 ## Frontend
 
+### Servidor de Desarrollo
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
+### Servidor de Producción
+
+```bash
+cd frontend
+npm install
+npm run build
+npm run preview
+```
+
 ## Backend
 
-El backend se implementará después y quedará aislado dentro de `backend/`.
+### Servidor de Desarrollo
+
+```bash
+cd backend
+npm install
+docker compose up -d # levantar contenedor BDD
+npm run dev
+```
+
+### Servidor de Producción
+
+```bash
+cd backend
+npm install
+docker compose up -d # levantar contenedor BDD
+npm run start
+```
