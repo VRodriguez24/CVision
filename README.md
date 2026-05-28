@@ -37,6 +37,7 @@ npm run preview
 cd backend
 npm install
 docker compose up -d # levantar contenedor BDD
+npm run prisma:migrate # ejecutar migraciones (opcional)
 npm run dev
 ```
 
@@ -46,6 +47,7 @@ npm run dev
 cd backend
 npm install
 docker compose up -d # levantar contenedor BDD
+npm run prisma:migrate # ejecutar migraciones (opcional)
 npm run start
 ```
 
