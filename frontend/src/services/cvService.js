@@ -27,3 +27,18 @@ export async function updateCv(cvId, payload) {
 
   return response.data;
 }
+
+export async function renameCv(cvId, payload) {
+  const response = await apiClient(`/cvs/${cvId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+
+  return response.data.cv;
+}
+
+export async function deleteCv(cvId) {
+  await apiClient(`/cvs/${cvId}`, {
+    method: 'DELETE',
+  });
+}
