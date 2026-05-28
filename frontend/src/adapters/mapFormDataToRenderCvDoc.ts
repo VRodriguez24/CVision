@@ -1,5 +1,20 @@
 import type { CvEducationItem, CvExperienceItem, CvFormData, CvPersonalProjectItem, CvSkillItem } from '../types/cvForm.js';
 
+const SECTION_TITLES_BY_LANGUAGE = {
+  spanish: {
+    experience: 'Experiencia',
+    personalProjects: 'Proyectos Personales',
+    skills: 'Habilidades',
+    education: 'Educación',
+  },
+  english: {
+    experience: 'Experience',
+    personalProjects: 'Personal Projects',
+    skills: 'Skills',
+    education: 'Education',
+  },
+} as const;
+
 function parseHighlights(highlights: string): string[] {
   return (highlights || '')
     .split('\n')
@@ -59,25 +74,26 @@ function mapEducation(items: CvEducationItem[]) {
 
 export function mapFormDataToRenderCvDoc(formData: CvFormData) {
   const sections: Record<string, unknown[]> = {};
+  const sectionTitles = SECTION_TITLES_BY_LANGUAGE[formData.language];
 
   const experience = mapExperience(formData.sections.experience);
   if (experience.length > 0) {
-    sections.Experience = experience;
+    sections[sectionTitles.experience] = experience;
   }
 
   const personalProjects = mapPersonalProjects(formData.sections.personalProjects);
   if (personalProjects.length > 0) {
-    sections['Personal Projects'] = personalProjects;
+    sections[sectionTitles.personalProjects] = personalProjects;
   }
 
   const skills = mapSkills(formData.sections.skills);
   if (skills.length > 0) {
-    sections.Skills = skills;
+    sections[sectionTitles.skills] = skills;
   }
 
   const education = mapEducation(formData.sections.education);
   if (education.length > 0) {
-    sections.Education = education;
+    sections[sectionTitles.education] = education;
   }
 
   const socialNetworks = formData.socialsExtra

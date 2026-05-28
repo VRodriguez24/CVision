@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CvEducationItem, CvExperienceItem, CvFormData, CvPersonalProjectItem, CvSkillItem, CvTheme } from '../../types/cvForm.js';
+import type { CvEducationItem, CvExperienceItem, CvFormData, CvLanguage, CvPersonalProjectItem, CvSkillItem, CvTheme } from '../../types/cvForm.js';
 import { availableFonts } from '../../engine/themeRegistry.js';
 
 interface FormPanelProps {
@@ -10,6 +10,10 @@ interface FormPanelProps {
 const THEME_OPTIONS: Array<{ label: string; value: CvTheme }> = [
   { label: 'Mart', value: 'mart' },
   { label: 'ModernCV', value: 'moderncv' },
+];
+const LANGUAGE_OPTIONS: Array<{ label: string; value: CvLanguage }> = [
+  { label: 'Español', value: 'spanish' },
+  { label: 'English', value: 'english' },
 ];
 
 const FONT_SIZE_OPTIONS = ['8pt', '9pt', '10pt', '11pt', '12pt', '14pt', '16pt', '18pt', '20pt', '25pt', '30pt'];
@@ -32,9 +36,11 @@ function SectionItemCard({ children }: { children: React.ReactNode }) {
 
 export function FormPanel({ value, onChange }: FormPanelProps) {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [isStylePopoverOpen, setIsStylePopoverOpen] = useState(false);
 
   const themeRef = useRef<HTMLDivElement>(null);
+  const languageRef = useRef<HTMLDivElement>(null);
   const styleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,6 +48,9 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
       const target = event.target as Node;
       if (themeRef.current && !themeRef.current.contains(target)) {
         setIsThemeMenuOpen(false);
+      }
+      if (languageRef.current && !languageRef.current.contains(target)) {
+        setIsLanguageMenuOpen(false);
       }
       if (styleRef.current && !styleRef.current.contains(target)) {
         setIsStylePopoverOpen(false);
@@ -70,6 +79,13 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
         ...prev.design,
         [key]: fieldValue,
       },
+    }));
+  };
+
+  const setLanguage = (language: CvLanguage) => {
+    onChange((prev) => ({
+      ...prev,
+      language,
     }));
   };
 
@@ -376,6 +392,36 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
                       }}
                     >
                       {themeOption.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="relative" ref={languageRef}>
+            <button
+              type="button"
+              className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              onClick={() => setIsLanguageMenuOpen((current) => !current)}
+            >
+              Idioma
+            </button>
+            {isLanguageMenuOpen ? (
+              <div className="absolute right-0 z-20 mt-2 w-44 rounded border border-zinc-200 bg-white p-1 shadow-lg">
+                {LANGUAGE_OPTIONS.map((languageOption) => {
+                  const selected = value.language === languageOption.value;
+                  return (
+                    <button
+                      key={languageOption.value}
+                      type="button"
+                      className={`w-full rounded px-3 py-2 text-left text-sm ${selected ? 'bg-blue-50 text-blue-700' : 'text-zinc-700 hover:bg-zinc-100'}`}
+                      onClick={() => {
+                        setLanguage(languageOption.value);
+                        setIsLanguageMenuOpen(false);
+                      }}
+                    >
+                      {languageOption.label}
                     </button>
                   );
                 })}

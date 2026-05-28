@@ -1,6 +1,7 @@
 import type { CvFormData } from '../../types/cvForm.js';
 
 export const initialFormData: CvFormData = {
+  language: 'spanish',
   basics: {
     name: 'Ada Lovelace',
     headline: 'Software Engineer',

@@ -1,4 +1,5 @@
 export type CvTheme = 'mart' | 'moderncv';
+export type CvLanguage = 'spanish' | 'english';
 
 export interface CvBasics {
   name: string;
@@ -78,6 +79,7 @@ export interface CvDesignForm {
 }
 
 export interface CvFormData {
+  language: CvLanguage;
   basics: CvBasics;
   socialsExtra: CvSocialExtra[];
   sections: CvFormSections;
