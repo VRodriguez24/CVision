@@ -32,13 +32,13 @@ export const defaultSidebarItems = [
 ];
 
 const shortLabels = {
-  Dashboard: 'Home',
+  Dashboard: 'Editor',
   'My CVs': 'CVs',
   'AI Optimizer': 'AI',
   'Job Matches': 'Jobs',
-  Settings: 'Settings',
+  Settings: 'Opciones',
   'Admin Panel': 'Admin',
-  'Help Support': 'Help',
+  'Help Support': 'Ayuda',
 };
 
 export const defaultSidebarSecondaryItems = [
