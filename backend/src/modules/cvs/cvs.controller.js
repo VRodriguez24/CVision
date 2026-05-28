@@ -35,3 +35,21 @@ export async function updateCv(request, response, next) {
     next(error);
   }
 }
+
+export async function renameCv(request, response, next) {
+  try {
+    const cv = await cvsService.renameCv(request.user.id, request.validated.params.cvId, request.validated.body);
+    response.json({ data: { cv } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteCv(request, response, next) {
+  try {
+    await cvsService.deleteCv(request.user.id, request.validated.params.cvId);
+    response.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}

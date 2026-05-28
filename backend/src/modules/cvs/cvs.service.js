@@ -161,3 +161,58 @@ export async function updateCv(userId, cvId, { snapshot }) {
     };
   });
 }
+
+export async function renameCv(userId, cvId, { title }) {
+  const normalizedTitle = title.trim();
+
+  const cv = await prisma.cV.findFirst({
+    where: {
+      id: cvId,
+      userId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!cv) {
+    throw notFoundError();
+  }
+
+  try {
+    return await prisma.cV.update({
+      where: { id: cvId },
+      data: {
+        title: normalizedTitle,
+      },
+      select: cvSummarySelect,
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new AppError('You already have a CV with this title', {
+        statusCode: 409,
+        code: errorCodes.CONFLICT,
+      });
+    }
+
+    throw error;
+  }
+}
+
+export async function deleteCv(userId, cvId) {
+  const result = await prisma.cV.updateMany({
+    where: {
+      id: cvId,
+      userId,
+      deletedAt: null,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
+
+  if (result.count === 0) {
+    throw notFoundError();
+  }
+}
