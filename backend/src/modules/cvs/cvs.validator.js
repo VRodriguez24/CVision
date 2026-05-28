@@ -6,3 +6,18 @@ export const createCvSchema = z.object({
     snapshot: z.object({}).passthrough(),
   }),
 });
+
+export const cvIdParamSchema = z.object({
+  params: z.object({
+    cvId: z.string().uuid(),
+  }),
+});
+
+export const updateCvSchema = z.object({
+  params: z.object({
+    cvId: z.string().uuid(),
+  }),
+  body: z.object({
+    snapshot: z.object({}).passthrough(),
+  }),
+});

@@ -17,3 +17,21 @@ export async function listCvs(request, response, next) {
     next(error);
   }
 }
+
+export async function getCvById(request, response, next) {
+  try {
+    const result = await cvsService.getCvById(request.user.id, request.validated.params.cvId);
+    response.json({ data: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateCv(request, response, next) {
+  try {
+    const result = await cvsService.updateCv(request.user.id, request.validated.params.cvId, request.validated.body);
+    response.json({ data: result });
+  } catch (error) {
+    next(error);
+  }
+}
