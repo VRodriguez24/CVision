@@ -61,8 +61,8 @@ export function DashboardPage() {
             onMouseDown={onDividerMouseDown}
           />
 
-          <div style={{ width: `${100 - splitPercent}%` }} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-[#2d2d2d]">
-            <div className="flex justify-end border-b border-zinc-700 bg-[#262626] p-2">
+          <div style={{ width: `${100 - splitPercent}%` }} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-low">
+            <div className="flex justify-end border-b border-outline-variant bg-white p-2">
               <button
                 type="button"
                 onClick={handleDownloadPdf}
@@ -81,8 +81,8 @@ export function DashboardPage() {
 
         <div className="grid h-full grid-rows-2 gap-3 md:hidden">
           <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} /></div>
-          <div className="flex flex-col overflow-hidden bg-[#2d2d2d]">
-            <div className="flex justify-end border-b border-zinc-700 bg-[#262626] p-2">
+          <div className="flex flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-low">
+            <div className="flex justify-end border-b border-outline-variant bg-white p-2">
               <button
                 type="button"
                 onClick={handleDownloadPdf}

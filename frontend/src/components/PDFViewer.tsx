@@ -89,7 +89,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url, loading, maxPageWidth
 
   if (!url && pdfs.length === 0) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-[#2d2d2d] text-gray-500">
+      <div className="flex h-full w-full items-center justify-center bg-surface-container-low text-on-surface-variant">
         <div className="flex flex-col items-center gap-3">
           <svg className="h-12 w-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -101,7 +101,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url, loading, maxPageWidth
   }
 
   return (
-    <div ref={containerRef} className="relative flex h-full min-h-0 w-full justify-center overflow-x-hidden overflow-y-auto bg-[#2d2d2d]" data-testid="pdf-viewer">
+    <div ref={containerRef} className="relative flex h-full min-h-0 w-full justify-center overflow-x-hidden overflow-y-auto bg-surface-container-low" data-testid="pdf-viewer">
       {loading ? (
         <div className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-600/90 px-4 py-2 text-sm font-semibold text-white shadow-2xl backdrop-blur animate-pulse">
           <svg className="h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url, loading, maxPageWidth
                   Array.from(new Array(pagesCount), (_, fileIndex) => (
                     <div
                       key={`page_${pdf.id}_${fileIndex + 1}`}
-                      className="mx-auto mb-4 overflow-hidden rounded border border-[#404040] shadow-2xl"
+                      className="mx-auto mb-4 overflow-hidden rounded border border-outline-variant shadow-card"
                       style={{ maxWidth: renderWidth, width: '100%' }}
                     >
                       <Page
