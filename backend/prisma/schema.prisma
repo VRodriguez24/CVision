@@ -262,6 +262,7 @@ model CV {
   metricEvents  MetricEvent[]
 
   @@index([userId])
+  @@unique([userId, title])
   @@index([templateId])
   @@index([status])
   @@index([deletedAt])

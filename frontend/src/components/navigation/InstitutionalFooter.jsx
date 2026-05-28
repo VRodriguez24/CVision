@@ -9,7 +9,7 @@ const defaultLinks = [
 
 export function InstitutionalFooter({
   brand = 'CVision',
-  text = '© 2026 CVision - BNE & SENCE Chile. All rights reserved.',
+  text = '© 2026 CVision - BNE & SENCE Chile. Todos los derechos reservados.',
   links = defaultLinks,
   logos,
   className,
