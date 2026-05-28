@@ -9,6 +9,7 @@ import { RegisterPage } from '../pages/auth/RegisterPage.jsx';
 import { AdminDashboardPage } from '../pages/dashboard/AdminDashboardPage.jsx';
 import { ComingSoonPage } from '../pages/dashboard/ComingSoonPage.jsx';
 import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx';
+import { MyCvsPage } from '../pages/dashboard/MyCvsPage.jsx';
 import { LandingFooterLogos, LandingPage } from '../pages/LandingPage.jsx';
 import { ProtectedRoute } from './ProtectedRoute.jsx';
 
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'cvs',
-            element: <ComingSoonPage />,
+            element: <MyCvsPage />,
           },
           {
             path: 'cvs/new',
