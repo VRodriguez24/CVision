@@ -392,7 +392,7 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
               Estilo
             </button>
             {isStylePopoverOpen ? (
-              <div className="absolute right-0 z-20 mt-2 w-[340px] space-y-3 rounded border border-zinc-200 bg-white p-3 shadow-lg">
+              <div className="absolute right-0 z-20 mt-2 w-[28rem] max-w-[min(92vw,28rem)] space-y-3 rounded border border-zinc-200 bg-white p-4 shadow-lg">
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Tipografía</p>
 
                 <label className="block text-xs text-zinc-600">
