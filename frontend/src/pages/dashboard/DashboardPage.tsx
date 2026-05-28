@@ -1,4 +1,3 @@
-import { useAuth } from '../../context/index.js';
 import { useMemo, useRef, useState, useCallback } from 'react';
 import yaml from 'js-yaml';
 import { useRenderEngine } from '../../hooks/useRenderEngine.js';
@@ -8,10 +7,6 @@ import { initialFormData } from './formData.js';
 import { mapFormDataToRenderCvDoc } from '../../adapters/mapFormDataToRenderCvDoc.js';
 
 export function DashboardPage() {
-  const { user } = useAuth();
-  const firstName = user?.name?.split(' ')?.[0] ?? 'Usuario';
-  const targetRole = user?.profile?.targetRole || 'Ingeniero de Software Senior';
-
   const [formData, setFormData] = useState(initialFormData);
   const [splitPercent, setSplitPercent] = useState(45);
   const isDragging = useRef(false);
@@ -22,7 +17,7 @@ export function DashboardPage() {
     return yaml.dump(doc, { lineWidth: -1 });
   }, [formData]);
 
-  const { status, pdfUrl, error, wasmReady } = useRenderEngine(yamlString, 200);
+  const { status, pdfUrl, error } = useRenderEngine(yamlString, 200);
 
   const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

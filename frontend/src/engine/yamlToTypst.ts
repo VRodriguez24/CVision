@@ -39,7 +39,7 @@ interface CV {
     website?: string;
     linkedin?: string;
     github?: string;
-    social_networks?: Array<{ network: string; username?: string; name?: string }>;
+    social_networks?: Array<{ network: string; username?: string; name?: string; url?: string }>;
     sections?: Record<string, any[]>;
 }
 
@@ -356,13 +356,38 @@ function generateHeader(cv: CV): string {
     // Extract linkedin/github from social_networks array if present
     let linkedin = cv.linkedin;
     let github = cv.github;
+    const extraSocialConnections: string[] = [];
     if (cv.social_networks && Array.isArray(cv.social_networks)) {
         for (const sn of cv.social_networks) {
             const network = (sn.network || '').toLowerCase();
-            const username = sn.username || sn.name;
-            if (!username) continue;
-            if (network === 'linkedin') linkedin = linkedin || username;
-            else if (network === 'github') github = github || username;
+            const username = sn.username || sn.name || '';
+            const url = sn.url || '';
+            const hasUsername = Boolean(username.trim());
+            const hasUrl = Boolean(url.trim());
+
+            if (network === 'linkedin') {
+                if (!linkedin && hasUsername) linkedin = username.trim();
+                continue;
+            }
+            if (network === 'github') {
+                if (!github && hasUsername) github = username.trim();
+                continue;
+            }
+
+            if (!network && !hasUsername && !hasUrl) continue;
+
+            if (hasUrl) {
+                const label = hasUsername
+                    ? `${network || 'social'}: ${username}`.trim()
+                    : (network || url.replace('https://', '').replace('http://', '')).trim();
+                extraSocialConnections.push(`[#link("${url}")[${escapeTypst(label)}]]`);
+                continue;
+            }
+
+            if (hasUsername) {
+                const label = `${network || 'social'}: ${username}`.trim();
+                extraSocialConnections.push(`[${escapeTypst(label)}]`);
+            }
         }
     }
 
@@ -373,6 +398,7 @@ function generateHeader(cv: CV): string {
     if (cv.website) connections.push(`[#link("${cv.website}")[${cv.website.replace('https://', '')}]]`);
     if (linkedin) connections.push(`[#link("https://linkedin.com/in/${linkedin}")[linkedin.com/in/${linkedin}]]`);
     if (github) connections.push(`[#link("https://github.com/${github}")[github.com/${github}]]`);
+    connections.push(...extraSocialConnections);
 
     if (connections.length > 0) {
         lines.push(`#connections(\n  ${connections.join(',\n  ')},\n)`);
