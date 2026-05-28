@@ -349,7 +349,7 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
   };
 
   return (
-    <div className="space-y-4 bg-zinc-100 p-4">
+    <div className="h-full bg-zinc-100 p-4">
       <div className="flex items-center justify-between rounded border border-zinc-200 bg-white p-4">
         <h2 className="text-lg font-semibold text-zinc-800">Formulario CV</h2>
         <div className="flex items-center gap-2">
@@ -549,174 +549,182 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
         </div>
       </div>
 
-      <PanelSection title="Información base">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Nombre" value={value.basics.name} onChange={setBasicField('name')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Titular" value={value.basics.headline} onChange={setBasicField('headline')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={value.basics.location} onChange={setBasicField('location')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Email" value={value.basics.email} onChange={setBasicField('email')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Teléfono" value={value.basics.phone} onChange={setBasicField('phone')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Sitio web" value={value.basics.website} onChange={setBasicField('website')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="LinkedIn (username)" value={value.basics.linkedin} onChange={setBasicField('linkedin')} />
-          <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="GitHub (username)" value={value.basics.github} onChange={setBasicField('github')} />
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="xl:col-span-2">
+          <PanelSection title="Información base">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Nombre" value={value.basics.name} onChange={setBasicField('name')} />
+              <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Titular" value={value.basics.headline} onChange={setBasicField('headline')} />
+              <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={value.basics.location} onChange={setBasicField('location')} />
+              <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Email" value={value.basics.email} onChange={setBasicField('email')} />
+              <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Teléfono" value={value.basics.phone} onChange={setBasicField('phone')} />
+              <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="LinkedIn (username)" value={value.basics.linkedin} onChange={setBasicField('linkedin')} />
+            </div>
+          </PanelSection>
         </div>
-      </PanelSection>
 
-      <PanelSection title="Redes sociales extra">
-        <div className="space-y-3">
-          {value.socialsExtra.map((social, index) => (
-            <SectionItemCard key={`social-${index}`}>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                <input
-                  className="h-10 rounded border border-zinc-300 px-3 text-sm"
-                  placeholder="Red (ej: X, Behance)"
-                  value={social.network}
-                  onChange={setSocialField(index, 'network')}
-                />
-                <input
-                  className="h-10 rounded border border-zinc-300 px-3 text-sm"
-                  placeholder="Usuario"
-                  value={social.username}
-                  onChange={setSocialField(index, 'username')}
-                />
-                <input
-                  className="h-10 rounded border border-zinc-300 px-3 text-sm"
-                  placeholder="URL"
-                  value={social.url}
-                  onChange={setSocialField(index, 'url')}
-                />
-              </div>
-              <button type="button" onClick={() => removeSocial(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
-                Quitar red
-              </button>
-            </SectionItemCard>
-          ))}
-          <button type="button" onClick={addSocial} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
-            Agregar red social
-          </button>
-        </div>
-      </PanelSection>
+        <PanelSection title="Redes sociales extra">
+          <div className="space-y-3">
+            {value.socialsExtra.map((social, index) => (
+              <SectionItemCard key={`social-${index}`}>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                  <input
+                    className="h-10 rounded border border-zinc-300 px-3 text-sm"
+                    placeholder="Red (ej: X, Behance)"
+                    value={social.network}
+                    onChange={setSocialField(index, 'network')}
+                  />
+                  <input
+                    className="h-10 rounded border border-zinc-300 px-3 text-sm"
+                    placeholder="Usuario"
+                    value={social.username}
+                    onChange={setSocialField(index, 'username')}
+                  />
+                  <input
+                    className="h-10 rounded border border-zinc-300 px-3 text-sm"
+                    placeholder="URL"
+                    value={social.url}
+                    onChange={setSocialField(index, 'url')}
+                  />
+                </div>
+                <button type="button" onClick={() => removeSocial(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
+                  Quitar red
+                </button>
+              </SectionItemCard>
+            ))}
+            <button type="button" onClick={addSocial} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
+              Agregar red social
+            </button>
+          </div>
+        </PanelSection>
 
-      <PanelSection title="Experiencia">
-        <div className="space-y-3">
-          {value.sections.experience.map((item, index) => (
-            <SectionItemCard key={`experience-${index}`}>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Cargo" value={item.position} onChange={setExperienceField(index, 'position')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Empresa" value={item.company} onChange={setExperienceField(index, 'company')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={item.location} onChange={setExperienceField(index, 'location')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Fecha" value={item.date} onChange={setExperienceField(index, 'date')} />
-              </div>
-              <textarea
-                className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                rows={3}
-                placeholder="Resumen"
-                value={item.summary}
-                onChange={setExperienceField(index, 'summary')}
-              />
-              <textarea
-                className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                rows={3}
-                placeholder="Logros (uno por línea)"
-                value={item.highlights}
-                onChange={setExperienceField(index, 'highlights')}
-              />
-              <button type="button" onClick={() => removeExperience(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
-                Quitar experiencia
-              </button>
-            </SectionItemCard>
-          ))}
-          <button type="button" onClick={addExperience} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
-            Agregar experiencia
-          </button>
-        </div>
-      </PanelSection>
+        <PanelSection title="Habilidades">
+          <div className="space-y-3">
+            {value.sections.skills.map((item, index) => (
+              <SectionItemCard key={`skill-${index}`}>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                  <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Etiqueta" value={item.label} onChange={setSkillField(index, 'label')} />
+                  <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Detalles" value={item.details} onChange={setSkillField(index, 'details')} />
+                </div>
+                <button type="button" onClick={() => removeSkill(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
+                  Quitar habilidad
+                </button>
+              </SectionItemCard>
+            ))}
+            <button type="button" onClick={addSkill} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
+              Agregar habilidad
+            </button>
+          </div>
+        </PanelSection>
 
-      <PanelSection title="Proyectos personales">
-        <div className="space-y-3">
-          {value.sections.personalProjects.map((item, index) => (
-            <SectionItemCard key={`project-${index}`}>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Nombre" value={item.name} onChange={setProjectField(index, 'name')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Fecha" value={item.date} onChange={setProjectField(index, 'date')} />
-              </div>
-              <textarea
-                className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                rows={3}
-                placeholder="Detalle"
-                value={item.detail}
-                onChange={setProjectField(index, 'detail')}
-              />
-              <textarea
-                className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                rows={3}
-                placeholder="Logros (uno por línea)"
-                value={item.highlights}
-                onChange={setProjectField(index, 'highlights')}
-              />
-              <button type="button" onClick={() => removeProject(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
-                Quitar proyecto
+        <div className="xl:col-span-2">
+          <PanelSection title="Experiencia">
+            <div className="space-y-3">
+              {value.sections.experience.map((item, index) => (
+                <SectionItemCard key={`experience-${index}`}>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Cargo" value={item.position} onChange={setExperienceField(index, 'position')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Empresa" value={item.company} onChange={setExperienceField(index, 'company')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={item.location} onChange={setExperienceField(index, 'location')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Fecha" value={item.date} onChange={setExperienceField(index, 'date')} />
+                  </div>
+                  <textarea
+                    className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    rows={3}
+                    placeholder="Resumen"
+                    value={item.summary}
+                    onChange={setExperienceField(index, 'summary')}
+                  />
+                  <textarea
+                    className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    rows={3}
+                    placeholder="Logros (uno por línea)"
+                    value={item.highlights}
+                    onChange={setExperienceField(index, 'highlights')}
+                  />
+                  <button type="button" onClick={() => removeExperience(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
+                    Quitar experiencia
+                  </button>
+                </SectionItemCard>
+              ))}
+              <button type="button" onClick={addExperience} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
+                Agregar experiencia
               </button>
-            </SectionItemCard>
-          ))}
-          <button type="button" onClick={addProject} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
-            Agregar proyecto
-          </button>
+            </div>
+          </PanelSection>
         </div>
-      </PanelSection>
 
-      <PanelSection title="Habilidades">
-        <div className="space-y-3">
-          {value.sections.skills.map((item, index) => (
-            <SectionItemCard key={`skill-${index}`}>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Etiqueta" value={item.label} onChange={setSkillField(index, 'label')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Detalles" value={item.details} onChange={setSkillField(index, 'details')} />
-              </div>
-              <button type="button" onClick={() => removeSkill(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
-                Quitar habilidad
+        <div className="xl:col-span-2">
+          <PanelSection title="Proyectos personales">
+            <div className="space-y-3">
+              {value.sections.personalProjects.map((item, index) => (
+                <SectionItemCard key={`project-${index}`}>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Nombre" value={item.name} onChange={setProjectField(index, 'name')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Fecha" value={item.date} onChange={setProjectField(index, 'date')} />
+                  </div>
+                  <textarea
+                    className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    rows={3}
+                    placeholder="Detalle"
+                    value={item.detail}
+                    onChange={setProjectField(index, 'detail')}
+                  />
+                  <textarea
+                    className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    rows={3}
+                    placeholder="Logros (uno por línea)"
+                    value={item.highlights}
+                    onChange={setProjectField(index, 'highlights')}
+                  />
+                  <button type="button" onClick={() => removeProject(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
+                    Quitar proyecto
+                  </button>
+                </SectionItemCard>
+              ))}
+              <button type="button" onClick={addProject} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
+                Agregar proyecto
               </button>
-            </SectionItemCard>
-          ))}
-          <button type="button" onClick={addSkill} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
-            Agregar habilidad
-          </button>
+            </div>
+          </PanelSection>
         </div>
-      </PanelSection>
 
-      <PanelSection title="Educación">
-        <div className="space-y-3">
-          {value.sections.education.map((item, index) => (
-            <SectionItemCard key={`education-${index}`}>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <input
-                  className="h-10 rounded border border-zinc-300 px-3 text-sm"
-                  placeholder="Institución"
-                  value={item.institution}
-                  onChange={setEducationField(index, 'institution')}
-                />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Área" value={item.area} onChange={setEducationField(index, 'area')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Grado (opcional)" value={item.degree} onChange={setEducationField(index, 'degree')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={item.location} onChange={setEducationField(index, 'location')} />
-                <input className="h-10 rounded border border-zinc-300 px-3 text-sm md:col-span-2" placeholder="Fecha" value={item.date} onChange={setEducationField(index, 'date')} />
-              </div>
-              <textarea
-                className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                rows={3}
-                placeholder="Resumen"
-                value={item.summary}
-                onChange={setEducationField(index, 'summary')}
-              />
-              <button type="button" onClick={() => removeEducation(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
-                Quitar educación
+        <div className="xl:col-span-2">
+          <PanelSection title="Educación">
+            <div className="space-y-3">
+              {value.sections.education.map((item, index) => (
+                <SectionItemCard key={`education-${index}`}>
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <input
+                      className="h-10 rounded border border-zinc-300 px-3 text-sm"
+                      placeholder="Institución"
+                      value={item.institution}
+                      onChange={setEducationField(index, 'institution')}
+                    />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Área" value={item.area} onChange={setEducationField(index, 'area')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Grado (opcional)" value={item.degree} onChange={setEducationField(index, 'degree')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={item.location} onChange={setEducationField(index, 'location')} />
+                    <input className="h-10 rounded border border-zinc-300 px-3 text-sm md:col-span-2" placeholder="Fecha" value={item.date} onChange={setEducationField(index, 'date')} />
+                  </div>
+                  <textarea
+                    className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    rows={3}
+                    placeholder="Resumen"
+                    value={item.summary}
+                    onChange={setEducationField(index, 'summary')}
+                  />
+                  <button type="button" onClick={() => removeEducation(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
+                    Quitar educación
+                  </button>
+                </SectionItemCard>
+              ))}
+              <button type="button" onClick={addEducation} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
+                Agregar educación
               </button>
-            </SectionItemCard>
-          ))}
-          <button type="button" onClick={addEducation} className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm hover:bg-zinc-50">
-            Agregar educación
-          </button>
+            </div>
+          </PanelSection>
         </div>
-      </PanelSection>
+      </div>
     </div>
   );
 }

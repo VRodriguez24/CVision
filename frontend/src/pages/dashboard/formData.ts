@@ -7,9 +7,9 @@ export const initialFormData: CvFormData = {
     location: 'Santiago, Chile',
     email: 'ada@example.com',
     phone: '+56 9 1234 5678',
-    website: 'https://adalovelace.dev',
+    website: '',
     linkedin: 'ada-lovelace',
-    github: 'adalovelace',
+    github: '',
   },
   socialsExtra: [
     {

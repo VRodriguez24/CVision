@@ -8,7 +8,7 @@ import { mapFormDataToRenderCvDoc } from '../../adapters/mapFormDataToRenderCvDo
 
 export function DashboardPage() {
   const [formData, setFormData] = useState(initialFormData);
-  const [splitPercent, setSplitPercent] = useState(45);
+  const [splitPercent, setSplitPercent] = useState(50);
   const isDragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -22,76 +22,77 @@ export function DashboardPage() {
   const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     isDragging.current = true;
+
     const onMove = (ev: MouseEvent) => {
       if (!isDragging.current || !containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const percent = ((ev.clientX - rect.left) / rect.width) * 100;
-      setSplitPercent(Math.min(75, Math.max(25, percent)));
+      setSplitPercent(Math.min(65, Math.max(35, percent)));
     };
+
     const onUp = () => {
       isDragging.current = false;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
+
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   }, []);
 
-
   const handleDownloadPdf = useCallback(() => {
-    if (pdfUrl) {
-      const a = document.createElement('a');
-      a.href = pdfUrl;
-      a.download = 'document.pdf';
-      a.click();
-    }
+    if (!pdfUrl) return;
+    const a = document.createElement('a');
+    a.href = pdfUrl;
+    a.download = 'document.pdf';
+    a.click();
   }, [pdfUrl]);
 
   return (
-    <div className="mx-auto max-w-[1180px] pl-0 pr-8">
-      <div ref={containerRef} className="h-[calc(100vh-140px)] overflow-hidden">
-        <div className="hidden md:flex h-full w-full">
-          <div style={{ width: `${splitPercent}%` }} className="h-full overflow-auto">
+    <div className="w-full max-w-none">
+      <div ref={containerRef} className="h-[calc(100vh-150px)] min-h-0 w-full overflow-hidden">
+        <div className="hidden h-full w-full min-h-0 min-w-0 md:flex">
+          <div style={{ width: `${splitPercent}%` }} className="h-full min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
             <FormPanel value={formData} onChange={setFormData} />
           </div>
 
           <div
-            className="w-1.5 bg-zinc-300 hover:bg-blue-500 cursor-col-resize flex-shrink-0"
+            className="h-full w-2 flex-shrink-0 cursor-col-resize bg-zinc-300 transition-colors hover:bg-blue-500"
             onMouseDown={onDividerMouseDown}
           />
 
-          <div style={{ width: `${100 - splitPercent}%` }} className="h-full overflow-hidden bg-[#2d2d2d] flex flex-col">
-            <div className="flex justify-end p-2 border-b border-zinc-700 bg-[#262626]">
+          <div style={{ width: `${100 - splitPercent}%` }} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-[#2d2d2d]">
+            <div className="flex justify-end border-b border-zinc-700 bg-[#262626] p-2">
               <button
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={!pdfUrl}
-                className="px-3 py-1.5 text-sm font-medium rounded bg-blue-600 text-white hover:bg-blue-500 disabled:bg-zinc-600 disabled:text-zinc-300 disabled:cursor-not-allowed"
+                className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
               >
                 Descargar PDF
               </button>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="min-h-0 flex-1 overflow-hidden">
               <PDFViewer url={pdfUrl} loading={status === 'compiling'} />
             </div>
-            {error && <div className="p-2 text-xs text-red-600">{error}</div>}
+            {error ? <div className="p-2 text-xs text-red-600">{error}</div> : null}
           </div>
         </div>
 
-        <div className="md:hidden h-full grid grid-rows-2 gap-3">
+        <div className="grid h-full grid-rows-2 gap-3 md:hidden">
           <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} /></div>
-          <div className="overflow-hidden bg-[#2d2d2d] flex flex-col">
-            <div className="flex justify-end p-2 border-b border-zinc-700 bg-[#262626]">
+          <div className="flex flex-col overflow-hidden bg-[#2d2d2d]">
+            <div className="flex justify-end border-b border-zinc-700 bg-[#262626] p-2">
               <button
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={!pdfUrl}
-                className="px-3 py-1.5 text-sm font-medium rounded bg-blue-600 text-white hover:bg-blue-500 disabled:bg-zinc-600 disabled:text-zinc-300 disabled:cursor-not-allowed"
+                className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
               >
                 Descargar PDF
               </button>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="min-h-0 flex-1 overflow-hidden">
               <PDFViewer url={pdfUrl} loading={status === 'compiling'} />
             </div>
           </div>
