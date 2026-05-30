@@ -6,6 +6,7 @@ export function Modal({ open, title, description, children, onClose, footer, cla
   if (!open) {
     return null;
   }
+  const hasBodyContent = children !== undefined && children !== null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-primary/35 px-margin-mobile py-8">
@@ -38,8 +39,12 @@ export function Modal({ open, title, description, children, onClose, footer, cla
             </Button>
           ) : null}
         </div>
-        <div className="p-6">{children}</div>
-        {footer ? <div className="border-t border-card-border p-6">{footer}</div> : null}
+        {hasBodyContent ? <div className="p-6">{children}</div> : null}
+        {footer ? (
+          <div className={cn('p-6', hasBodyContent ? 'border-t border-card-border' : null)}>
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>
   );

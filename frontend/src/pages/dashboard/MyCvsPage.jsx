@@ -3,7 +3,7 @@ import { FileText, RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import editIcon from '../../assets/icons/edit_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg';
 import deleteIcon from '../../assets/icons/delete_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg';
-import { Button, Card, Modal } from '../../components/ui/index.js';
+import { Button, Card, ConfirmModal, Modal } from '../../components/ui/index.js';
 import { deleteCv, listCvs, renameCv } from '../../services/cvService.js';
 
 const CV_TITLE_MAX_LENGTH = 160;
@@ -44,6 +44,7 @@ export function MyCvsPage() {
 
   const [renamingCvId, setRenamingCvId] = useState(null);
   const [deletingCvId, setDeletingCvId] = useState(null);
+  const [confirmState, setConfirmState] = useState(null);
 
   const hasItems = useMemo(() => items.length > 0, [items]);
 
@@ -66,13 +67,11 @@ export function MyCvsPage() {
   }, [load]);
 
   const handleOpenCv = (cv) => {
-    const shouldReplace = window.confirm('Se cargará este CV en el editor principal y reemplazará la edición actual. ¿Deseas continuar?');
-
-    if (!shouldReplace) {
+    if (deletingCvId || renamingCvId) {
       return;
     }
 
-    navigate(`/dashboard?cvId=${cv.id}`);
+    setConfirmState({ type: 'open', cv });
   };
 
   const handleOpenRenameModal = (event, cv) => {
@@ -137,30 +136,48 @@ export function MyCvsPage() {
     }
   };
 
-  const handleDeleteCv = async (event, cv) => {
+  const handleDeleteCv = (event, cv) => {
     event.stopPropagation();
 
     if (deletingCvId || renamingCvId) {
       return;
     }
 
-    const shouldDelete = window.confirm(`¿Seguro que quieres eliminar "${cv.title}"?`);
+    setConfirmState({ type: 'delete', cv });
+  };
 
-    if (!shouldDelete) {
+  const handleCloseConfirmModal = () => {
+    if (deletingCvId) {
       return;
     }
 
-    setDeletingCvId(cv.id);
+    setConfirmState(null);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmState?.cv) return;
+
+    if (confirmState.type === 'open') {
+      navigate(`/dashboard?cvId=${confirmState.cv.id}`);
+      setConfirmState(null);
+      return;
+    }
+
+    if (confirmState.type !== 'delete' || deletingCvId || renamingCvId) return;
+
+    const targetCvId = confirmState.cv.id;
+    setDeletingCvId(targetCvId);
     setFeedback(null);
 
     try {
-      await deleteCv(cv.id);
-      setItems((current) => current.filter((item) => item.id !== cv.id));
+      await deleteCv(targetCvId);
+      setItems((current) => current.filter((item) => item.id !== targetCvId));
       setFeedback({ type: 'success', message: 'CV eliminado correctamente.' });
     } catch {
       setFeedback({ type: 'error', message: 'No pudimos eliminar el CV. Intenta nuevamente.' });
     } finally {
       setDeletingCvId(null);
+      setConfirmState(null);
     }
   };
 
@@ -236,6 +253,7 @@ export function MyCvsPage() {
                       type="button"
                       aria-label="Renombrar CV"
                       onClick={(event) => handleOpenRenameModal(event, cv)}
+                      onKeyDown={(event) => event.stopPropagation()}
                       disabled={actionDisabled}
                       className="inline-flex h-9 w-9 items-center justify-center rounded transition-colors hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -245,6 +263,7 @@ export function MyCvsPage() {
                       type="button"
                       aria-label="Eliminar CV"
                       onClick={(event) => handleDeleteCv(event, cv)}
+                      onKeyDown={(event) => event.stopPropagation()}
                       disabled={actionDisabled}
                       className="inline-flex h-9 w-9 items-center justify-center rounded transition-colors hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -304,6 +323,22 @@ export function MyCvsPage() {
           {renameError ? <p className="text-body-sm text-error">{renameError}</p> : null}
         </form>
       </Modal>
+
+      <ConfirmModal
+        open={Boolean(confirmState)}
+        title={confirmState?.type === 'delete' ? 'Eliminar CV' : 'Cargar CV en el editor'}
+        description={
+          confirmState?.type === 'delete'
+            ? `¿Seguro que quieres eliminar "${confirmState?.cv?.title}"?`
+            : `Se cargará "${confirmState?.cv?.title}" en el editor principal y reemplazará la edición actual.`
+        }
+        confirmLabel={confirmState?.type === 'delete' ? 'Sí, eliminar CV' : 'Sí, cargar CV'}
+        cancelLabel="Cancelar"
+        onConfirm={handleConfirmAction}
+        onClose={handleCloseConfirmModal}
+        loading={Boolean(deletingCvId) && confirmState?.type === 'delete'}
+        intent={confirmState?.type === 'delete' ? 'danger' : 'default'}
+      />
     </div>
   );
 }
