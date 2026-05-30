@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import yaml from 'js-yaml';
+import toast from 'react-hot-toast';
 import { useRenderEngine } from '../../hooks/useRenderEngine.js';
 import { PDFViewer } from '../../components/PDFViewer.js';
 import { FormPanel } from '../../components/form/FormPanel.js';
@@ -10,6 +11,12 @@ import { mapFormDataToRenderCvDoc } from '../../adapters/mapFormDataToRenderCvDo
 import { createCv, getCvById, updateCv } from '../../services/cvService.js';
 
 const CV_TITLE_MAX_LENGTH = 160;
+const TOAST_IDS = {
+  loadingCv: 'dashboard-loading-cv',
+  editingCv: 'dashboard-editing-cv',
+  loadError: 'dashboard-load-error',
+  saveResult: 'dashboard-save-result',
+} as const;
 
 interface ActiveCv {
   id: string;
@@ -26,11 +33,9 @@ export function DashboardPage() {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [cvTitle, setCvTitle] = useState('');
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeCv, setActiveCv] = useState<ActiveCv | null>(null);
   const [isLoadingCv, setIsLoadingCv] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
   const isDragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeCvId = searchParams.get('cvId');
@@ -49,15 +54,15 @@ export function DashboardPage() {
       if (!activeCvId) {
         if (!ignore) {
           setActiveCv(null);
-          setLoadError(null);
           setIsLoadingCv(false);
+          toast.dismiss(TOAST_IDS.loadingCv);
+          toast.dismiss(TOAST_IDS.editingCv);
         }
         return;
       }
 
       setIsLoadingCv(true);
-      setLoadError(null);
-      setSaveSuccess(null);
+      toast.loading('Cargando CV seleccionado...', { id: TOAST_IDS.loadingCv });
 
       try {
         const payload = await getCvById(activeCvId);
@@ -66,14 +71,18 @@ export function DashboardPage() {
 
         setActiveCv(payload.cv);
         setFormData(payload.snapshot);
+        toast.dismiss(TOAST_IDS.loadError);
+        toast(`Editando: ${payload.cv.title}`, { id: TOAST_IDS.editingCv });
       } catch {
         if (!ignore) {
-          setLoadError('No pudimos cargar este CV para edición.');
           setActiveCv(null);
+          toast.dismiss(TOAST_IDS.editingCv);
+          toast.error('No pudimos cargar este CV para edición.', { id: TOAST_IDS.loadError });
         }
       } finally {
         if (!ignore) {
           setIsLoadingCv(false);
+          toast.dismiss(TOAST_IDS.loadingCv);
         }
       }
     }
@@ -82,6 +91,7 @@ export function DashboardPage() {
 
     return () => {
       ignore = true;
+      toast.dismiss(TOAST_IDS.loadingCv);
     };
   }, [activeCvId]);
 
@@ -116,7 +126,6 @@ export function DashboardPage() {
 
   const handleOpenSaveModal = useCallback(() => {
     setSaveError(null);
-    setSaveSuccess(null);
     setCvTitle('');
     setIsSaveModalOpen(true);
   }, []);
@@ -154,15 +163,17 @@ export function DashboardPage() {
 
         setIsSaveModalOpen(false);
         setCvTitle('');
-        setSaveSuccess('CV guardado como nuevo correctamente.');
+        toast.success('CV guardado como nuevo correctamente.', { id: TOAST_IDS.saveResult });
       } catch (requestError) {
         const statusCode = (requestError as { status?: number }).status;
         const errorCode = (requestError as { code?: string }).code;
 
         if (statusCode === 409 || errorCode === 'CONFLICT') {
           setSaveError('Ya tienes un CV con ese nombre. Usa un nombre distinto.');
+          toast.error('Ya tienes un CV con ese nombre. Usa un nombre distinto.', { id: TOAST_IDS.saveResult });
         } else {
           setSaveError('No pudimos guardar el CV. Intenta nuevamente en unos minutos.');
+          toast.error('No pudimos guardar el CV. Intenta nuevamente en unos minutos.', { id: TOAST_IDS.saveResult });
         }
       } finally {
         setIsSaving(false);
@@ -175,8 +186,6 @@ export function DashboardPage() {
     if (!activeCv || isSaving) return;
 
     setIsSaving(true);
-    setSaveError(null);
-    setSaveSuccess(null);
 
     try {
       const result = await updateCv(activeCv.id, {
@@ -184,9 +193,9 @@ export function DashboardPage() {
       });
 
       setActiveCv(result.cv);
-      setSaveSuccess('Cambios guardados en el CV actual.');
+      toast.success('Cambios guardados en el CV actual.', { id: TOAST_IDS.saveResult });
     } catch {
-      setSaveError('No pudimos guardar los cambios en este CV. Intenta nuevamente.');
+      toast.error('No pudimos guardar los cambios en este CV. Intenta nuevamente.', { id: TOAST_IDS.saveResult });
     } finally {
       setIsSaving(false);
     }
@@ -225,28 +234,6 @@ export function DashboardPage() {
 
   return (
     <div className="w-full max-w-none">
-      {activeCv ? (
-        <div className="mb-3 rounded border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
-          Editando: {activeCv.title}
-        </div>
-      ) : null}
-
-      {isLoadingCv ? (
-        <div className="mb-3 rounded border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">Cargando CV seleccionado...</div>
-      ) : null}
-
-      {loadError ? (
-        <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{loadError}</div>
-      ) : null}
-
-      {saveSuccess ? (
-        <div className="mb-3 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{saveSuccess}</div>
-      ) : null}
-
-      {saveError && !isSaveModalOpen ? (
-        <div className="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{saveError}</div>
-      ) : null}
-
       <div ref={containerRef} className="h-[calc(100vh-150px)] min-h-0 w-full overflow-hidden">
         <div className="hidden h-full w-full min-h-0 min-w-0 md:flex">
           <div style={{ width: `${splitPercent}%` }} className="h-full min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
