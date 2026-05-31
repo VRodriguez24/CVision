@@ -36,7 +36,7 @@ export function DashboardLayout({
   footerProps,
   children,
 }) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const location = useLocation();
@@ -64,6 +64,7 @@ export function DashboardLayout({
         items={navigationItems}
         secondaryItems={secondaryNavigationItems}
         cta={createCta}
+        onSignOut={signOut}
         showAdmin={canAccessAdmin}
         isDesktopVisible={isSidebarVisible}
         isOpen={isSidebarOpen}
