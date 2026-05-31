@@ -6,6 +6,7 @@ import { useRenderEngine } from '../../hooks/useRenderEngine.js';
 import { PDFViewer } from '../../components/PDFViewer.js';
 import { FormPanel } from '../../components/form/FormPanel.js';
 import { Modal } from '../../components/ui/index.js';
+import { useAuth } from '../../context/index.js';
 import { initialFormData } from './formData.js';
 import { mapFormDataToRenderCvDoc } from '../../adapters/mapFormDataToRenderCvDoc.js';
 import { createCv, getCvById, updateCv } from '../../services/cvService.js';
@@ -17,6 +18,21 @@ const TOAST_IDS = {
   loadError: 'dashboard-load-error',
   saveResult: 'dashboard-save-result',
 } as const;
+const FILE_NAME_INVALID_CHARACTERS = /[\\/:*?"<>|\u0000-\u001F]/g;
+const FILE_NAME_EXTRA_UNDERSCORES = /_+/g;
+
+function sanitizeFileNameSegment(value: string | null | undefined, fallback: string) {
+  const sanitized = (value ?? '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(FILE_NAME_INVALID_CHARACTERS, '')
+    .replace(/\s+/g, '_')
+    .replace(FILE_NAME_EXTRA_UNDERSCORES, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return sanitized || fallback;
+}
 
 interface ActiveCv {
   id: string;
@@ -27,6 +43,7 @@ interface ActiveCv {
 }
 
 export function DashboardPage() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState(initialFormData);
   const [splitPercent, setSplitPercent] = useState(50);
@@ -118,11 +135,16 @@ export function DashboardPage() {
 
   const handleDownloadPdf = useCallback(() => {
     if (!pdfUrl) return;
+
+    const usernameAlias = user?.email?.split('@')[0] ?? '';
+    const usernamePart = sanitizeFileNameSegment(usernameAlias, 'usuario');
+    const titlePart = sanitizeFileNameSegment(activeCv?.title ?? 'Nuevo CV', 'cv');
+
     const a = document.createElement('a');
     a.href = pdfUrl;
-    a.download = 'document.pdf';
+    a.download = `${usernamePart}_${titlePart}.pdf`;
     a.click();
-  }, [pdfUrl]);
+  }, [activeCv?.title, pdfUrl, user?.email]);
 
   const handleOpenSaveModal = useCallback(() => {
     setSaveError(null);
@@ -237,7 +259,7 @@ export function DashboardPage() {
       <div ref={containerRef} className="h-[calc(100vh-150px)] min-h-0 w-full overflow-hidden">
         <div className="hidden h-full w-full min-h-0 min-w-0 md:flex">
           <div style={{ width: `${splitPercent}%` }} className="h-full min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
-            <FormPanel value={formData} onChange={setFormData} />
+            <FormPanel value={formData} onChange={setFormData} cvTitle={activeCv?.title} />
           </div>
 
           <div
@@ -255,7 +277,7 @@ export function DashboardPage() {
         </div>
 
         <div className="grid h-full grid-rows-2 gap-3 md:hidden">
-          <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} /></div>
+          <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} cvTitle={activeCv?.title} /></div>
           <div className="flex flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-low">
             <div className="flex justify-end border-b border-outline-variant bg-white p-2">{renderPreviewActions}</div>
             <div className="min-h-0 flex-1 overflow-hidden">
