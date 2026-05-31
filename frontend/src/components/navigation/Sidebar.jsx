@@ -3,12 +3,13 @@ import {
   CircleHelp,
   FileText,
   LayoutDashboard,
-  Plus,
+  LogOut,
   Settings,
   ShieldCheck,
   Sparkles,
   X,
 } from 'lucide-react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '../../utils/cn.js';
 import { Button } from '../ui/Button.jsx';
@@ -89,13 +90,29 @@ export function Sidebar({
   items = defaultSidebarItems,
   secondaryItems = defaultSidebarSecondaryItems,
   cta,
+  onSignOut,
   showAdmin = false,
   isDesktopVisible = true,
   isOpen = false,
   onClose,
   className,
 }) {
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const visibleSecondaryItems = secondaryItems.filter((item) => item.icon !== 'admin' || showAdmin);
+  const handleSignOut = async () => {
+    if (!onSignOut || isSigningOut) return;
+
+    setIsSigningOut(true);
+
+    try {
+      if (isOpen) {
+        onClose?.();
+      }
+      await onSignOut();
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
@@ -116,24 +133,23 @@ export function Sidebar({
 
       <div className="mt-auto px-3 pb-6">
         <div className="mb-5 border-t border-outline-variant" />
-        {/* {cta ? (
-          <div className="mb-5">
-            <Button
-              as={cta.to ? NavLink : 'button'}
-              to={cta.to}
-              onClick={cta.onClick}
-              className="h-10 w-full justify-center gap-2 rounded bg-primary px-2 text-label-sm text-on-primary"
-            >
-              <Plus aria-hidden="true" size={16} />
-              {cta.shortLabel || cta.label}
-            </Button>
-          </div>
-        ) : null} */}
         <nav aria-label="Navegación secundaria" className="space-y-2">
           {visibleSecondaryItems.map((item) => (
             <SidebarLink key={item.to} item={item} onNavigate={onClose} />
           ))}
         </nav>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label="Cerrar sesión"
+          disabled={isSigningOut}
+          onClick={handleSignOut}
+          className="mt-4 h-10 w-full justify-start gap-2 rounded px-3 font-heading text-label-sm tracking-[0.02em] text-on-surface hover:bg-surface-container hover:text-on-surface"
+        >
+          <LogOut aria-hidden="true" size={16} />
+          {isSigningOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
+        </Button>
       </div>
     </div>
   );
