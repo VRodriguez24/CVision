@@ -5,6 +5,7 @@ import { availableFonts } from '../../engine/themeRegistry.js';
 interface FormPanelProps {
   value: CvFormData;
   onChange: React.Dispatch<React.SetStateAction<CvFormData>>;
+  cvTitle?: string | null;
 }
 
 const THEME_OPTIONS: Array<{ label: string; value: CvTheme }> = [
@@ -34,10 +35,11 @@ function SectionItemCard({ children }: { children: React.ReactNode }) {
   return <div className="space-y-2 rounded border border-zinc-200 bg-zinc-50 p-3">{children}</div>;
 }
 
-export function FormPanel({ value, onChange }: FormPanelProps) {
+export function FormPanel({ value, onChange, cvTitle }: FormPanelProps) {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [isStylePopoverOpen, setIsStylePopoverOpen] = useState(false);
+  const resolvedCvTitle = cvTitle?.trim() || 'Nuevo CV';
 
   const themeRef = useRef<HTMLDivElement>(null);
   const languageRef = useRef<HTMLDivElement>(null);
@@ -367,7 +369,7 @@ export function FormPanel({ value, onChange }: FormPanelProps) {
   return (
     <div className="h-full bg-zinc-100 p-4">
       <div className="flex items-center justify-between rounded border border-zinc-200 bg-white p-4">
-        <h2 className="text-lg font-semibold text-zinc-800">Formulario CV</h2>
+        <h2 className="text-lg font-semibold text-zinc-800">{resolvedCvTitle}</h2>
         <div className="flex items-center gap-2">
           <div className="relative" ref={themeRef}>
             <button

@@ -237,7 +237,7 @@ export function DashboardPage() {
       <div ref={containerRef} className="h-[calc(100vh-150px)] min-h-0 w-full overflow-hidden">
         <div className="hidden h-full w-full min-h-0 min-w-0 md:flex">
           <div style={{ width: `${splitPercent}%` }} className="h-full min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
-            <FormPanel value={formData} onChange={setFormData} />
+            <FormPanel value={formData} onChange={setFormData} cvTitle={activeCv?.title} />
           </div>
 
           <div
@@ -255,7 +255,7 @@ export function DashboardPage() {
         </div>
 
         <div className="grid h-full grid-rows-2 gap-3 md:hidden">
-          <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} /></div>
+          <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} cvTitle={activeCv?.title} /></div>
           <div className="flex flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-low">
             <div className="flex justify-end border-b border-outline-variant bg-white p-2">{renderPreviewActions}</div>
             <div className="min-h-0 flex-1 overflow-hidden">
