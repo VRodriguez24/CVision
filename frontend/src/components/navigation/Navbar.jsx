@@ -1,4 +1,4 @@
-import { Bell, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Button } from '../ui/Button.jsx';
 import { cn } from '../../utils/cn.js';
 
@@ -71,11 +71,11 @@ export function Navbar({
         </div>
         <div className="flex shrink-0 items-center gap-4">
           {actions ? <div className="hidden items-center gap-3 md:flex">{actions}</div> : null}
-          {showNotifications ? (
+          {/* {showNotifications ? (
             <Button variant="ghost" size="m" aria-label="Notificaciones" className="h-10 w-10 px-0">
               <Bell aria-hidden="true" size={20} />
             </Button>
-          ) : null}
+          ) : null} */}
           <UserAvatar user={user} />
         </div>
       </div>
