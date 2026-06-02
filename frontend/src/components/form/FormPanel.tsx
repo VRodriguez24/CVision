@@ -6,6 +6,16 @@ interface FormPanelProps {
   value: CvFormData;
   onChange: React.Dispatch<React.SetStateAction<CvFormData>>;
   cvTitle?: string | null;
+  onImproveField?: (request: ImproveFieldRequest) => void;
+  improvingFieldPath?: string | null;
+}
+
+export interface ImproveFieldRequest {
+  fieldPath: string;
+  fieldLabel: string;
+  text: string;
+  selectionStart: number | null;
+  selectionEnd: number | null;
 }
 
 const THEME_OPTIONS: Array<{ label: string; value: CvTheme }> = [
@@ -35,7 +45,69 @@ function SectionItemCard({ children }: { children: React.ReactNode }) {
   return <div className="space-y-2 rounded border border-zinc-200 bg-zinc-50 p-3">{children}</div>;
 }
 
-export function FormPanel({ value, onChange, cvTitle }: FormPanelProps) {
+function ImproveButton({ disabled, isLoading, onClick }: { disabled: boolean; isLoading: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="shrink-0 rounded border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {isLoading ? 'Mejorando...' : 'Mejorar con IA'}
+    </button>
+  );
+}
+
+function AiTextArea({
+  className,
+  fieldLabel,
+  fieldPath,
+  improvingFieldPath,
+  onChange,
+  onImproveField,
+  placeholder,
+  rows,
+  value,
+}: {
+  className: string;
+  fieldLabel: string;
+  fieldPath: string;
+  improvingFieldPath?: string | null;
+  onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
+  onImproveField?: (request: ImproveFieldRequest) => void;
+  placeholder: string;
+  rows: number;
+  value: string;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isLoading = improvingFieldPath === fieldPath;
+
+  const handleImprove = () => {
+    const element = textareaRef.current;
+    onImproveField?.({
+      fieldPath,
+      fieldLabel,
+      text: value,
+      selectionStart: element?.selectionStart ?? null,
+      selectionEnd: element?.selectionEnd ?? null,
+    });
+  };
+
+  if (!onImproveField) {
+    return <textarea className={className} rows={rows} placeholder={placeholder} value={value} onChange={onChange} />;
+  }
+
+  return (
+    <div className="space-y-2">
+      <textarea ref={textareaRef} className={className} rows={rows} placeholder={placeholder} value={value} onChange={onChange} />
+      <div className="flex justify-end">
+        <ImproveButton disabled={isLoading || !value.trim()} isLoading={isLoading} onClick={handleImprove} />
+      </div>
+    </div>
+  );
+}
+
+export function FormPanel({ value, onChange, cvTitle, onImproveField, improvingFieldPath }: FormPanelProps) {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const [isStylePopoverOpen, setIsStylePopoverOpen] = useState(false);
@@ -676,19 +748,27 @@ export function FormPanel({ value, onChange, cvTitle }: FormPanelProps) {
                     <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={item.location} onChange={setExperienceField(index, 'location')} />
                     <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Fecha" value={item.date} onChange={setExperienceField(index, 'date')} />
                   </div>
-                  <textarea
+                  <AiTextArea
                     className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    fieldLabel="Resumen de experiencia"
+                    fieldPath={`sections.experience.${index}.summary`}
+                    improvingFieldPath={improvingFieldPath}
                     rows={3}
                     placeholder="Resumen"
                     value={item.summary}
                     onChange={setExperienceField(index, 'summary')}
+                    onImproveField={onImproveField}
                   />
-                  <textarea
+                  <AiTextArea
                     className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    fieldLabel="Logros de experiencia"
+                    fieldPath={`sections.experience.${index}.highlights`}
+                    improvingFieldPath={improvingFieldPath}
                     rows={3}
                     placeholder="Logros (uno por línea)"
                     value={item.highlights}
                     onChange={setExperienceField(index, 'highlights')}
+                    onImproveField={onImproveField}
                   />
                   <button type="button" onClick={() => removeExperience(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
                     Quitar experiencia
@@ -711,19 +791,27 @@ export function FormPanel({ value, onChange, cvTitle }: FormPanelProps) {
                     <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Nombre" value={item.name} onChange={setProjectField(index, 'name')} />
                     <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Fecha" value={item.date} onChange={setProjectField(index, 'date')} />
                   </div>
-                  <textarea
+                  <AiTextArea
                     className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    fieldLabel="Detalle de proyecto"
+                    fieldPath={`sections.personalProjects.${index}.detail`}
+                    improvingFieldPath={improvingFieldPath}
                     rows={3}
                     placeholder="Detalle"
                     value={item.detail}
                     onChange={setProjectField(index, 'detail')}
+                    onImproveField={onImproveField}
                   />
-                  <textarea
+                  <AiTextArea
                     className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    fieldLabel="Logros de proyecto"
+                    fieldPath={`sections.personalProjects.${index}.highlights`}
+                    improvingFieldPath={improvingFieldPath}
                     rows={3}
                     placeholder="Logros (uno por línea)"
                     value={item.highlights}
                     onChange={setProjectField(index, 'highlights')}
+                    onImproveField={onImproveField}
                   />
                   <button type="button" onClick={() => removeProject(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
                     Quitar proyecto
@@ -754,12 +842,16 @@ export function FormPanel({ value, onChange, cvTitle }: FormPanelProps) {
                     <input className="h-10 rounded border border-zinc-300 px-3 text-sm" placeholder="Ubicación" value={item.location} onChange={setEducationField(index, 'location')} />
                     <input className="h-10 rounded border border-zinc-300 px-3 text-sm md:col-span-2" placeholder="Fecha" value={item.date} onChange={setEducationField(index, 'date')} />
                   </div>
-                  <textarea
+                  <AiTextArea
                     className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                    fieldLabel="Resumen de educación"
+                    fieldPath={`sections.education.${index}.summary`}
+                    improvingFieldPath={improvingFieldPath}
                     rows={3}
                     placeholder="Resumen"
                     value={item.summary}
                     onChange={setEducationField(index, 'summary')}
+                    onImproveField={onImproveField}
                   />
                   <button type="button" onClick={() => removeEducation(index)} className="text-xs font-medium text-red-600 hover:text-red-700">
                     Quitar educación
