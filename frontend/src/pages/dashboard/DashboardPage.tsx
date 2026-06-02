@@ -629,7 +629,18 @@ export function DashboardPage() {
         footer={null}
       >
         {analysisResult ? (
-          <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-1">
+          <div className="max-h-[70vh] overflow-y-auto pr-1">
+            <div className="sticky top-0 z-10 mb-5 flex justify-end bg-white pb-3">
+              <button
+                type="button"
+                onClick={() => setAnalysisResult(null)}
+                className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50"
+              >
+                Cerrar sugerencias
+              </button>
+            </div>
+
+            <div className="space-y-5">
             <section className="rounded border border-blue-100 bg-blue-50 p-4">
               <h3 className="font-heading text-label-md font-semibold text-blue-900">Resumen</h3>
               <p className="mt-2 text-sm text-blue-950">{analysisResult.summary}</p>
@@ -764,6 +775,7 @@ export function DashboardPage() {
                 </p>
               )}
             </section>
+            </div>
           </div>
         ) : null}
       </Modal>
