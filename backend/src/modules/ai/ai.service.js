@@ -3,7 +3,7 @@ import { env } from '../../config/env.js';
 import { AppError } from '../../errors/AppError.js';
 import { errorCodes } from '../../errors/errorCodes.js';
 
-const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
+const GEMINI_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
 const fieldImprovementResponseSchema = z.object({
   improvedText: z.string(),
@@ -109,9 +109,9 @@ const cvAnalysisJsonSchema = {
   },
 };
 
-function assertOpenAiConfigured() {
-  if (!env.OPENAI_API_KEY) {
-    throw new AppError('OpenAI API key is not configured', {
+function assertGeminiConfigured() {
+  if (!env.GEMINI_API_KEY) {
+    throw new AppError('Gemini API key is not configured', {
       statusCode: 503,
       code: errorCodes.AI_CONFIGURATION_ERROR,
     });
@@ -119,70 +119,110 @@ function assertOpenAiConfigured() {
 }
 
 function extractOutputText(payload) {
-  if (typeof payload.output_text === 'string') {
-    return payload.output_text;
+  const candidate = payload?.candidates?.[0];
+
+  if (candidate?.finishReason === 'MAX_TOKENS') {
+    throw new AppError('Gemini response was truncated before producing complete JSON', {
+      statusCode: 502,
+      code: errorCodes.AI_PROVIDER_ERROR,
+      details: candidate.safetyRatings ?? [],
+    });
   }
 
-  for (const item of payload.output ?? []) {
-    for (const content of item.content ?? []) {
-      if (content.type === 'output_text' && typeof content.text === 'string') {
-        return content.text;
-      }
+  if (candidate?.finishReason && candidate.finishReason !== 'STOP') {
+    throw new AppError(`Gemini finished without usable output: ${candidate.finishReason}`, {
+      statusCode: 422,
+      code: errorCodes.AI_PROVIDER_ERROR,
+      details: candidate.safetyRatings ?? [],
+    });
+  }
 
-      if (content.type === 'refusal' && typeof content.refusal === 'string') {
-        throw new AppError(content.refusal, {
-          statusCode: 422,
-          code: errorCodes.AI_PROVIDER_ERROR,
-        });
-      }
+  const outputText = candidate?.content?.parts
+    ?.map((part) => part.text)
+    .filter((text) => typeof text === 'string')
+    .join('')
+    .trim();
+
+  if (outputText) {
+    return outputText;
+  }
+
+  for (const feedback of [payload?.promptFeedback, candidate]) {
+    if (feedback?.blockReason) {
+      throw new AppError(`Gemini blocked the request: ${feedback.blockReason}`, {
+        statusCode: 422,
+        code: errorCodes.AI_PROVIDER_ERROR,
+        details: feedback.safetyRatings ?? [],
+      });
     }
   }
 
-  throw new AppError('OpenAI response did not include usable text output', {
+  throw new AppError('Gemini response did not include usable text output', {
     statusCode: 502,
     code: errorCodes.AI_PROVIDER_ERROR,
   });
 }
 
-async function createStructuredResponse({ instructions, input, schemaName, schema, maxOutputTokens }) {
-  assertOpenAiConfigured();
+function parseStructuredJson(outputText) {
+  try {
+    return JSON.parse(outputText);
+  } catch {
+    const firstObjectIndex = outputText.indexOf('{');
+    const lastObjectIndex = outputText.lastIndexOf('}');
 
-  const response = await fetch(OPENAI_RESPONSES_URL, {
+    if (firstObjectIndex >= 0 && lastObjectIndex > firstObjectIndex) {
+      try {
+        return JSON.parse(outputText.slice(firstObjectIndex, lastObjectIndex + 1));
+      } catch {
+      }
+    }
+
+    throw new AppError('Gemini response was not valid JSON', {
+      statusCode: 502,
+      code: errorCodes.AI_PROVIDER_ERROR,
+    });
+  }
+}
+
+async function createStructuredResponse({ instructions, input, schema, maxOutputTokens }) {
+  assertGeminiConfigured();
+
+  const response = await fetch(`${GEMINI_API_BASE_URL}/models/${env.AI_MODEL}:generateContent`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      'x-goog-api-key': env.GEMINI_API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: env.AI_MODEL,
-      instructions,
-      input: [
+      systemInstruction: {
+        parts: [
+          {
+            text: instructions,
+          },
+        ],
+      },
+      contents: [
         {
           role: 'user',
-          content: [
+          parts: [
             {
-              type: 'input_text',
               text: JSON.stringify(input),
             },
           ],
         },
       ],
-      text: {
-        format: {
-          type: 'json_schema',
-          name: schemaName,
-          schema,
-          strict: true,
-        },
+      generationConfig: {
+        maxOutputTokens,
+        responseMimeType: 'application/json',
+        responseJsonSchema: schema,
       },
-      max_output_tokens: maxOutputTokens,
     }),
   });
 
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new AppError(payload?.error?.message ?? 'OpenAI request failed', {
+    throw new AppError(payload?.error?.message ?? 'Gemini request failed', {
       statusCode: response.status >= 500 ? 502 : 400,
       code: errorCodes.AI_PROVIDER_ERROR,
       details: payload?.error ? [payload.error] : [],
@@ -190,15 +230,7 @@ async function createStructuredResponse({ instructions, input, schemaName, schem
   }
 
   const outputText = extractOutputText(payload);
-
-  try {
-    return JSON.parse(outputText);
-  } catch {
-    throw new AppError('OpenAI response was not valid JSON', {
-      statusCode: 502,
-      code: errorCodes.AI_PROVIDER_ERROR,
-    });
-  }
+  return parseStructuredJson(outputText);
 }
 
 export async function improveField({ fieldPath, fieldLabel, text, selectedText, targetRole, cv }) {
@@ -212,7 +244,6 @@ export async function improveField({ fieldPath, fieldLabel, text, selectedText, 
   }
 
   const result = await createStructuredResponse({
-    schemaName: 'cv_field_improvement',
     schema: fieldImprovementJsonSchema,
     maxOutputTokens: 900,
     instructions: [
@@ -236,9 +267,8 @@ export async function improveField({ fieldPath, fieldLabel, text, selectedText, 
 
 export async function analyzeCv({ targetRole, cv }) {
   const result = await createStructuredResponse({
-    schemaName: 'cv_analysis',
     schema: cvAnalysisJsonSchema,
-    maxOutputTokens: 3500,
+    maxOutputTokens: 8192,
     instructions: [
       'Eres un experto en reclutamiento, ATS y revisión de CVs para estudiantes próximos a egresar y recién titulados en Chile.',
       'Analiza redacción, claridad, compatibilidad ATS, campos relevantes vacíos, fechas inconsistentes y palabras clave para el cargo o área objetivo.',
