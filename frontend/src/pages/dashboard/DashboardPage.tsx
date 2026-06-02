@@ -44,7 +44,7 @@ interface ActiveCv {
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formData, setFormData] = useState(initialFormData);
   const [splitPercent, setSplitPercent] = useState(50);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -178,11 +178,17 @@ export function DashboardPage() {
       setSaveError(null);
 
       try {
-        await createCv({
+        const createdCv = await createCv({
           title: normalizedTitle,
           snapshot: formData,
         });
 
+        setActiveCv(createdCv);
+        setSearchParams((currentParams) => {
+          const nextParams = new URLSearchParams(currentParams);
+          nextParams.set('cvId', createdCv.id);
+          return nextParams;
+        }, { replace: true });
         setIsSaveModalOpen(false);
         setCvTitle('');
         toast.success('CV guardado como nuevo correctamente.', { id: TOAST_IDS.saveResult });
@@ -201,7 +207,7 @@ export function DashboardPage() {
         setIsSaving(false);
       }
     },
-    [cvTitle, formData],
+    [cvTitle, formData, setSearchParams],
   );
 
   const handleSaveChanges = useCallback(async () => {
