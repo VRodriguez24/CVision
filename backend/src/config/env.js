@@ -12,6 +12,8 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.coerce.number().int().positive().default(604800),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
   LOG_LEVEL: z.string().default('info'),
+  OPENAI_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().default('gpt-5.4-mini'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
