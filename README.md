@@ -1,6 +1,8 @@
 # CVision
 
-CVision es una plataforma web orientada a estudiantes próximos a egresar y recién titulados en Chile para crear currículums profesionales ATS-friendly con inteligencia artificial.
+CVision es una plataforma web para crear, editar, guardar y optimizar curriculums profesionales compatibles con ATS, orientada a estudiantes proximos a egresar y recien titulados en Chile.
+
+El proyecto esta organizado como un monorepo con una aplicacion React/Vite en el frontend y una API REST Node.js/Express en el backend. El backend persiste usuarios, sesiones, CVs y datos asociados en PostgreSQL mediante Prisma, y expone integraciones de IA con Gemini para mejorar campos y analizar CVs.
 
 ## Estructura
 
@@ -68,6 +70,17 @@ npm install
 npm run dev
 ```
 
-## Créditos
+## Stack
 
-- El motor de renderizado de PDF con `yaml` y **Typst** fue obtenido de [github.com/kirlts/YaCV](https://github.com/kirlts/YaCV)
+- Frontend: React 18, Vite, TailwindCSS, React Router, react-pdf, Typst WASM.
+- Backend: Node.js, Express, Prisma, PostgreSQL, JWT, Zod, Pino.
+- IA: Gemini API para optimizacion de texto y analisis ATS.
+
+## Documentacion por Modulo
+
+- [Backend](backend/README.md)
+- [Frontend](frontend/README.md)
+
+## Creditos
+
+El motor de renderizado de PDF basado en YAML y Typst fue adaptado desde [github.com/kirlts/YaCV](https://github.com/kirlts/YaCV).
