@@ -1,18 +1,25 @@
 # CVision Backend
 
-Backend futuro de CVision.
+API REST de CVision construida con Node.js, Express, PostgreSQL y Prisma.
 
-## Objetivo
+## Docker
 
-Implementar API REST con Node.js, Express.js, PostgreSQL y Prisma para conectar el frontend ya construido.
+La forma recomendada de levantar el backend es desde la raíz del proyecto:
 
-## Documentos base
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
 
-- [Arquitectura y ERD](../docs/BACKEND_ARCHITECTURE_ERD.md)
-- [Plan de implementación](../docs/BACKEND_IMPLEMENTATION_PLAN.md)
-- [Requerimientos backend](../docs/BACKEND_REQUIREMENTS.md)
-- Documento oficial SRS: `docs/2.1 Documento de requerimientos de software.docx-1.pdf`
+Ese flujo:
+- inicia Postgres
+- ejecuta `prisma migrate deploy` en un contenedor `migrate`
+- levanta el backend en `http://localhost:4000`
 
-## Estado
+## Ejecución local
 
-Pendiente de implementar. El primer paso será crear el scaffold Express/Prisma y el endpoint `GET /api/health`.
+```bash
+npm install
+npm run dev
+```
+
+Para usar una base local fuera de Docker, ajusta `DATABASE_URL` en `.env`.
