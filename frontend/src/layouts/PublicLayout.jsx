@@ -6,10 +6,10 @@ import { Button } from '../components/ui/Button.jsx';
 import { cn } from '../utils/cn.js';
 
 const defaultPublicNav = [
-  { label: 'Benefits', href: '#benefits', active: true },
-  { label: 'ATS Guide', href: '#ats' },
-  { label: 'Templates', href: '#templates' },
-  { label: 'Pricing', href: '#pricing' },
+  { label: 'Cómo funciona', href: '#como-funciona', active: true },
+  { label: 'Funciones', href: '#funciones' },
+  { label: 'Análisis ATS', href: '#ats' },
+  { label: 'Plantillas', href: '#plantillas' },
 ];
 
 export function PublicLayout({
@@ -116,10 +116,10 @@ export function PublicLayout({
             {actions || (
               <>
                 <Button as={NavLink} to="/auth" variant="ghost" className="hidden bg-transparent px-4 text-on-surface-variant hover:bg-transparent hover:text-primary sm:inline-flex">
-                  Log In
+                  Iniciar sesión
                 </Button>
                 <Button as={NavLink} to="/auth" className="btn-cta-sheen h-10 rounded px-5">
-                  Get Started
+                  Crear mi CV
                 </Button>
               </>
             )}

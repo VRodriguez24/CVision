@@ -1,87 +1,119 @@
 import {
   ArrowRight,
-  Bolt,
   CheckCircle2,
-  FileCheck2,
+  Download,
+  FolderOpen,
+  Gauge,
+  Languages,
+  LayoutTemplate,
+  Palette,
+  PenLine,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
+  Wand2,
 } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import { Badge, Button, Card } from '../components/ui/index.js';
 import cvLandingPageImage from '../assets/img/CV_LandingPage.png';
 
-const benefits = [
+const trustSignals = [
+  'Gratis para empezar',
+  'Sin tarjeta de crédito',
+  'Exporta tu PDF al instante',
+];
+
+const steps = [
   {
-    title: 'Impacto Profesional',
+    title: 'Completa tu información',
     description:
-      'Analizamos tu perfil contra métricas de impacto para asegurar que cada palabra comunique potencial y foco profesional.',
-    icon: TrendingUp,
+      'Carga tu experiencia, educación, proyectos y habilidades en un editor con vista previa del PDF en tiempo real.',
+    icon: PenLine,
   },
   {
-    title: 'Velocidad IA',
+    title: 'Mejora y analiza con IA',
     description:
-      'Genera una base sólida de CV en minutos, con estructura clara, lenguaje profesional y formato listo para iterar.',
-    icon: Bolt,
+      'Optimiza cada campo con un clic y revisa tu puntaje de compatibilidad ATS con sugerencias concretas por categoría.',
+    icon: Wand2,
   },
   {
-    title: 'Enfoque ATS',
+    title: 'Exporta y postula',
     description:
-      'Plantillas y recomendaciones diseñadas para sistemas de seguimiento de candidatos usados en procesos modernos.',
-    icon: FileCheck2,
+      'Descarga tu CV en PDF, con la plantilla y el idioma que prefieras, listo para postular.',
+    icon: Download,
+  },
+];
+
+const features = [
+  {
+    title: 'Editor en vivo',
+    description:
+      'Edita tu currículum con vista previa del PDF en tiempo real, directamente en tu navegador.',
+    icon: PenLine,
+  },
+  {
+    title: 'Mejorar con IA',
+    description:
+      'Reescribe cualquier campo con IA sin inventar datos: recibes una explicación de los cambios y notas de compatibilidad ATS.',
+    icon: Wand2,
+  },
+  {
+    title: 'Análisis ATS',
+    description:
+      'Obtén un puntaje de 0 a 100 y sugerencias por categoría: redacción, ATS, palabras clave, inconsistencias y campos faltantes.',
+    icon: Gauge,
+  },
+  {
+    title: 'Plantillas profesionales',
+    description:
+      'Elige entre plantillas como Classic, Mart, ModernCV y Engineering, optimizadas para legibilidad.',
+    icon: LayoutTemplate,
+  },
+  {
+    title: 'Personalización total',
+    description:
+      'Ajusta tipografías, colores, tamaños, interlineado y el espaciado de cada sección a tu gusto.',
+    icon: Palette,
+  },
+  {
+    title: 'Español o inglés',
+    description:
+      'Genera tu CV en el idioma que necesites para cada postulación, sin volver a escribirlo.',
+    icon: Languages,
+  },
+  {
+    title: 'Gestiona tus CVs',
+    description:
+      'Crea, guarda, renombra y versiona varios currículums desde tu panel personal.',
+    icon: FolderOpen,
+  },
+  {
+    title: 'Exporta en PDF gratis',
+    description:
+      'Descarga tu CV en PDF al instante, generado localmente y sin marcas de agua.',
+    icon: Download,
   },
 ];
 
 const atsBullets = [
-  'Optimización de palabras clave por industria.',
-  'Formateo estándar legible por bots.',
-  'Puntaje de compatibilidad en tiempo real.',
+  'Optimización de palabras clave según el rol objetivo.',
+  'Formato estándar y legible para lectores automáticos.',
+  'Puntaje de compatibilidad con sugerencias accionables.',
+];
+
+const atsCategories = [
+  { label: 'Redacción', count: 3 },
+  { label: 'Palabras clave', count: 5 },
+  { label: 'Campos faltantes', count: 2 },
+  { label: 'Inconsistencias', count: 1 },
 ];
 
 const templates = [
-  {
-    name: 'Executive Modern',
-    tone: 'Institucional',
-    rotation: '-rotate-2 hover:rotate-0',
-    accent: 'bg-secondary',
-  },
-  {
-    name: 'ATS Minimalist',
-    tone: 'Alta legibilidad',
-    rotation: 'scale-105',
-    accent: 'bg-primary-container',
-    featured: true,
-  },
-  {
-    name: 'Tech Focused',
-    tone: 'Tecnología',
-    rotation: 'rotate-2 hover:rotate-0',
-    accent: 'bg-on-secondary-container',
-  },
+  { name: 'Classic', tone: 'Sobrio y versátil', accent: 'bg-secondary' },
+  { name: 'Mart', tone: 'Compacto y elegante', accent: 'bg-primary-container' },
+  { name: 'ModernCV', tone: 'Clásico académico', accent: 'bg-on-secondary-container' },
+  { name: 'Engineering Classic', tone: 'Técnico y directo', accent: 'bg-secondary' },
+  { name: 'Engineering Resumes', tone: 'Optimizado para tech', accent: 'bg-primary-container' },
 ];
-
-function AvatarStack() {
-  const avatars = ['JC', 'MS', 'AR'];
-
-  return (
-    <div className="flex -space-x-3">
-      {avatars.map((avatar, index) => (
-        <div
-          key={avatar}
-          className={[
-            'flex h-10 w-10 items-center justify-center rounded-full border-2 border-surface font-heading text-label-sm text-on-primary',
-            index === 0 && 'bg-primary-container',
-            index === 1 && 'bg-secondary',
-            index === 2 && 'bg-on-secondary-container',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {avatar}
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function ResumeMockup() {
   return (
@@ -111,21 +143,33 @@ function AtsPanel() {
   return (
     <Card className="rounded-xl border-white/10 bg-white/5 p-6 shadow-none">
       <div className="mb-6 flex items-center justify-between">
-        <span className="font-heading text-label-md text-on-primary">CV Strength Score</span>
-        <span className="font-heading text-label-md text-secondary-fixed">94%</span>
+        <span className="font-heading text-label-md text-on-primary">Compatibilidad ATS</span>
+        <span className="rounded-sm bg-white/10 px-2 py-1 font-heading text-[10px] uppercase tracking-[0.18em] text-white/60">
+          Ejemplo
+        </span>
+      </div>
+      <div className="mb-2 flex items-end gap-2">
+        <span className="font-heading text-[40px] font-semibold leading-none text-secondary-fixed">82</span>
+        <span className="mb-1 font-heading text-label-md text-white/50">/ 100</span>
       </div>
       <div className="mb-8 h-2 rounded-full bg-white/10">
-        <div className="h-full w-[94%] rounded-full bg-secondary-fixed" />
+        <div className="h-full w-[82%] rounded-full bg-secondary-fixed" />
       </div>
-      <div className="space-y-4">
-        <div className="rounded border border-white/5 bg-white/5 p-3">
-          <p className="mb-1 font-heading text-[10px] uppercase tracking-[0.18em] text-white/50">Impact</p>
-          <p className="font-heading text-label-md text-on-primary">Strong Action Verbs Found</p>
-        </div>
-        <div className="rounded border border-white/5 bg-white/5 p-3">
-          <p className="mb-1 font-heading text-[10px] uppercase tracking-[0.18em] text-white/50">Keywords</p>
-          <p className="font-heading text-label-md text-on-primary">Fullstack, React, Chile, BNE</p>
-        </div>
+      <p className="mb-3 font-heading text-[10px] uppercase tracking-[0.18em] text-white/50">
+        Sugerencias por categoría
+      </p>
+      <div className="space-y-2">
+        {atsCategories.map((category) => (
+          <div
+            key={category.label}
+            className="flex items-center justify-between rounded border border-white/5 bg-white/5 px-3 py-2"
+          >
+            <span className="font-heading text-label-md text-on-primary">{category.label}</span>
+            <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-white/10 px-2 font-heading text-label-sm text-secondary-fixed">
+              {category.count}
+            </span>
+          </div>
+        ))}
       </div>
     </Card>
   );
@@ -133,17 +177,9 @@ function AtsPanel() {
 
 function TemplatePreview({ template }) {
   return (
-    <Card
-      className={[
-        'group w-full rounded-xl p-4 transition-transform duration-200 hover:-translate-y-1 md:w-1/3',
-        template.rotation,
-        template.featured && 'shadow-modal',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <Card className="group w-full rounded-xl p-4 transition-transform duration-200 hover:-translate-y-1">
       <div className="rounded bg-surface-container-low p-4">
-        <div className="mx-auto min-h-[280px] max-w-[220px] rounded-sm border border-outline-variant bg-white p-5 shadow-card">
+        <div className="mx-auto min-h-[240px] max-w-[200px] rounded-sm border border-outline-variant bg-white p-5 shadow-card">
           <div className={`mb-5 h-8 rounded-sm ${template.accent}`} />
           <div className="mb-5 space-y-2">
             <div className="h-3 w-28 rounded-sm bg-primary" />
@@ -183,50 +219,86 @@ export function LandingPage() {
             </Badge>
             <div className="space-y-5">
               <h1 className="max-w-[640px] font-heading text-[44px] font-semibold leading-[1.08] tracking-[-0.02em] text-on-background md:text-display">
-                Tu próximo empleo comienza con un <span className="text-secondary">CV optimizado</span> por IA
+                Crea un CV <span className="text-secondary">optimizado por IA</span> y listo para los filtros ATS
               </h1>
               <p className="max-w-[560px] text-body-lg text-on-surface-variant">
-                Nuestra tecnología analiza las vacantes del mercado chileno para destacar tus habilidades frente a los algoritmos de selección más exigentes.
+                Edita tu currículum con vista previa en tiempo real, mejora cada sección con inteligencia artificial y obtén un puntaje de compatibilidad ATS pensado para el mercado laboral chileno.
               </p>
             </div>
             <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
-              <Button className="btn-hero-arrow h-14 rounded px-8">
-                Crear mi CV
+              <Button as={NavLink} to="/auth" className="btn-hero-arrow h-14 rounded px-8">
+                Crear mi CV gratis
                 <ArrowRight aria-hidden="true" size={18} />
               </Button>
-              <Button variant="secondary" className="h-14 rounded px-8">
-                Ver Plantillas
+              <Button as="a" href="#como-funciona" variant="secondary" className="h-14 rounded px-8">
+                Cómo funciona
               </Button>
             </div>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-              <AvatarStack />
-              <p className="font-heading text-label-sm text-on-surface-variant">
-                +10,000 profesionales ya han optimizado su carrera
-              </p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              {trustSignals.map((signal) => (
+                <span
+                  key={signal}
+                  className="flex items-center gap-2 font-heading text-label-sm text-on-surface-variant"
+                >
+                  <CheckCircle2 aria-hidden="true" size={16} className="text-secondary" />
+                  {signal}
+                </span>
+              ))}
             </div>
           </div>
           <ResumeMockup />
         </div>
       </section>
 
-      <section id="benefits" className="bg-surface-container-low py-24">
+      <section id="como-funciona" className="bg-surface-container-low py-24">
         <div className="mx-auto max-w-container px-margin-mobile md:px-gutter lg:px-margin-desktop">
           <div className="mb-16 text-center">
-            <h2 className="font-heading text-headline-lg text-primary">¿Por qué elegir CVision?</h2>
+            <h2 className="font-heading text-headline-lg text-primary">Tu CV en tres pasos</h2>
             <p className="mt-4 text-body-md text-on-surface-variant">
-              Diseñado para los estándares de contratación modernos.
+              De una página en blanco a un currículum listo para postular.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {benefits.map((benefit) => {
-              const Icon = benefit.icon;
+            {steps.map((step, index) => {
+              const Icon = step.icon;
               return (
-                <Card key={benefit.title} className="group rounded-xl p-8 transition-colors hover:border-secondary">
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded bg-secondary-container/40 text-secondary transition-transform group-hover:scale-105">
+                <Card key={step.title} className="rounded-xl p-8">
+                  <div className="mb-6 flex items-center gap-4">
+                    <span className="flex h-12 w-12 items-center justify-center rounded bg-secondary-container/40 text-secondary">
+                      <Icon aria-hidden="true" size={22} />
+                    </span>
+                    <span className="font-heading text-headline-md text-outline">0{index + 1}</span>
+                  </div>
+                  <h3 className="font-heading text-headline-md text-primary">{step.title}</h3>
+                  <p className="mt-3 text-body-sm text-on-surface-variant">{step.description}</p>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section id="funciones" className="py-24">
+        <div className="mx-auto max-w-container px-margin-mobile md:px-gutter lg:px-margin-desktop">
+          <div className="mb-16 text-center">
+            <h2 className="font-heading text-headline-lg text-primary">Todo lo que necesitas para un CV competitivo</h2>
+            <p className="mt-4 text-body-md text-on-surface-variant">
+              Funciones reales, disponibles hoy en CVision.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card
+                  key={feature.title}
+                  className="group rounded-xl p-6 transition-colors hover:border-secondary"
+                >
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded bg-secondary-container/40 text-secondary transition-transform group-hover:scale-105">
                     <Icon aria-hidden="true" size={22} />
                   </div>
-                  <h3 className="font-heading text-headline-md text-primary">{benefit.title}</h3>
-                  <p className="mt-3 text-body-sm text-on-surface-variant">{benefit.description}</p>
+                  <h3 className="font-heading text-headline-md text-primary">{feature.title}</h3>
+                  <p className="mt-3 text-body-sm text-on-surface-variant">{feature.description}</p>
                 </Card>
               );
             })}
@@ -239,7 +311,7 @@ export function LandingPage() {
           <div>
             <h2 className="font-heading text-headline-lg text-on-primary">¿Qué es el ATS y por qué importa?</h2>
             <p className="mt-6 max-w-[640px] text-body-lg text-primary-fixed-dim">
-              El 75% de los CVs son rechazados por un Applicant Tracking System antes de que un reclutador humano los vea. Nuestra IA formatea tu información para que estos sistemas te califiquen mejor.
+              Muchos procesos de selección usan un Applicant Tracking System (ATS) que filtra los CVs antes de que un reclutador los lea. CVision formatea y analiza tu información para que estos sistemas la interpreten correctamente y mejoren tus opciones.
             </p>
             <ul className="mt-8 space-y-4">
               {atsBullets.map((bullet) => (
@@ -254,10 +326,13 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="templates" className="bg-surface py-24">
+      <section id="plantillas" className="bg-surface py-24">
         <div className="mx-auto max-w-container px-margin-mobile text-center md:px-gutter lg:px-margin-desktop">
-          <h2 className="mb-16 font-heading text-headline-lg text-primary">Diseños que abren puertas</h2>
-          <div className="flex flex-col items-center justify-center gap-8 md:flex-row">
+          <h2 className="mb-4 font-heading text-headline-lg text-primary">Plantillas que abren puertas</h2>
+          <p className="mx-auto mb-16 max-w-[560px] text-body-md text-on-surface-variant">
+            Elige el diseño que mejor se ajuste a tu perfil y personalízalo a tu gusto.
+          </p>
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
             {templates.map((template) => (
               <TemplatePreview key={template.name} template={template} />
             ))}
@@ -265,13 +340,15 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="pricing" className="bg-surface-container-lowest py-24 text-center">
+      <section className="bg-surface-container-lowest py-24 text-center">
         <div className="mx-auto flex max-w-container flex-col items-center gap-8 px-margin-mobile md:px-gutter lg:px-margin-desktop">
           <ShieldCheck aria-hidden="true" size={36} className="text-secondary" />
           <h2 className="max-w-[720px] font-heading text-[40px] font-semibold leading-[1.12] tracking-[-0.02em] text-primary md:text-display">
             ¿Listo para dar el siguiente paso en tu carrera?
           </h2>
-          <Button className="btn-cta-sheen h-14 rounded px-12">Crear mi CV ahora</Button>
+          <Button as={NavLink} to="/auth" className="btn-cta-sheen h-14 rounded px-12">
+            Crear mi CV ahora
+          </Button>
           <p className="text-body-sm text-on-surface-variant">
             Es gratis comenzar. No requiere tarjeta de crédito.
           </p>

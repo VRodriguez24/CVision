@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
         element: (
           <PublicLayout
             footerProps={{
-              text: '© 2026 CVision - BNE & SENCE Chile. All rights reserved. Potenciando la empleabilidad en todo el territorio nacional.',
+              text: '© 2026 CVision · BNE & SENCE Chile. Todos los derechos reservados. Potenciando la empleabilidad en todo el territorio nacional.',
               logos: <LandingFooterLogos />,
             }}
           />
