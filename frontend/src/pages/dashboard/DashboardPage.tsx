@@ -6,8 +6,11 @@ import { useRenderEngine } from '../../hooks/useRenderEngine.js';
 import { PDFViewer } from '../../components/PDFViewer.js';
 import { FormPanel } from '../../components/form/FormPanel.js';
 import type { ImproveFieldRequest } from '../../components/form/FormPanel.js';
-import { Modal } from '../../components/ui/index.js';
+import { Modal, Tooltip } from '../../components/ui/index.js';
 import { useAuth } from '../../context/index.js';
+import downloadIcon from '../../assets/icons/download_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg';
+import newWindowIcon from '../../assets/icons/new_window_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg';
+import saveIcon from '../../assets/icons/save_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg';
 import { initialFormData } from './formData.js';
 import { mapFormDataToRenderCvDoc } from '../../adapters/mapFormDataToRenderCvDoc.js';
 import { analyzeCv, improveField, type AiCvAnalysis, type AiSuggestion } from '../../services/aiService.js';
@@ -544,31 +547,40 @@ export function DashboardPage() {
         {isAnalyzingCv ? 'Analizando...' : 'Analizar CV con IA'}
       </button>
       {activeCv ? (
+        <Tooltip content="Guardar cambios" placement="bottom">
+          <button
+            type="button"
+            aria-label="Guardar cambios"
+            onClick={handleSaveChanges}
+            disabled={isSaving || isLoadingCv}
+            className="inline-flex h-9 w-9 items-center justify-center rounded bg-blue-600 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:opacity-70"
+          >
+            <img src={saveIcon} alt="" aria-hidden="true" className="h-5 w-5 brightness-0 invert" />
+          </button>
+        </Tooltip>
+      ) : null}
+      <Tooltip content="Guardar como nuevo" placement="bottom">
         <button
           type="button"
-          onClick={handleSaveChanges}
+          aria-label="Guardar como nuevo"
+          onClick={handleOpenSaveModal}
           disabled={isSaving || isLoadingCv}
-          className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
+          className="inline-flex h-9 w-9 items-center justify-center rounded border border-blue-600 bg-white transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSaving ? 'Guardando...' : 'Guardar cambios'}
+          <img src={newWindowIcon} alt="" aria-hidden="true" className="h-5 w-5" />
         </button>
-      ) : null}
-      <button
-        type="button"
-        onClick={handleOpenSaveModal}
-        disabled={isSaving || isLoadingCv}
-        className="rounded border border-blue-600 bg-white px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {activeCv ? 'Guardar como nuevo' : 'Guardar CV'}
-      </button>
-      <button
-        type="button"
-        onClick={handleDownloadPdf}
-        disabled={!pdfUrl}
-        className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
-      >
-        Descargar PDF
-      </button>
+      </Tooltip>
+      <Tooltip content="Descargar PDF" placement="bottom">
+        <button
+          type="button"
+          aria-label="Descargar PDF"
+          onClick={handleDownloadPdf}
+          disabled={!pdfUrl}
+          className="inline-flex h-9 w-9 items-center justify-center rounded bg-blue-600 transition-colors hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:opacity-70"
+        >
+          <img src={downloadIcon} alt="" aria-hidden="true" className="h-5 w-5 brightness-0 invert" />
+        </button>
+      </Tooltip>
     </div>
   );
 
@@ -586,7 +598,7 @@ export function DashboardPage() {
           />
 
           <div style={{ width: `${100 - splitPercent}%` }} className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-low">
-            <div className="flex justify-end border-b border-outline-variant bg-white p-2">{renderPreviewActions}</div>
+            <div className="flex justify-start border-b border-outline-variant bg-white p-2">{renderPreviewActions}</div>
             <div className="min-h-0 flex-1 overflow-hidden">
               <PDFViewer url={pdfUrl} loading={status === 'compiling'} />
             </div>
@@ -597,7 +609,7 @@ export function DashboardPage() {
         <div className="grid h-full grid-rows-2 gap-3 md:hidden">
           <div className="overflow-auto"><FormPanel value={formData} onChange={setFormData} cvTitle={activeCv?.title} onImproveField={handleImproveField} improvingFieldPath={improvingFieldPath} /></div>
           <div className="flex flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-low">
-            <div className="flex justify-end border-b border-outline-variant bg-white p-2">{renderPreviewActions}</div>
+            <div className="flex justify-start border-b border-outline-variant bg-white p-2">{renderPreviewActions}</div>
             <div className="min-h-0 flex-1 overflow-hidden">
               <PDFViewer url={pdfUrl} loading={status === 'compiling'} />
             </div>
