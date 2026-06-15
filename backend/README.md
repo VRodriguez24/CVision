@@ -49,6 +49,7 @@ Variables disponibles:
 | `LOG_LEVEL` | Nivel de logs Pino | `info` |
 | `GEMINI_API_KEY` | API key de Gemini | Vacio |
 | `AI_MODEL` | Modelo Gemini usado por la API | `gemini-2.5-flash` |
+| `AI_IMPROVE_FIELD_MAX_OUTPUT_TOKENS` | Maximo de tokens de salida para mejorar campos con IA | `4096` |
 
 
 La API queda disponible en `http://localhost:4000/api`.

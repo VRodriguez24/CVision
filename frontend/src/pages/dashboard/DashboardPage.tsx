@@ -27,6 +27,7 @@ const TOAST_IDS = {
 const FILE_NAME_INVALID_CHARACTERS = /[\\/:*?"<>|\u0000-\u001F]/g;
 const FILE_NAME_EXTRA_UNDERSCORES = /_+/g;
 const ATS_KEYWORDS_SKILL_LABEL = 'Palabras clave ATS';
+const LAST_OPENED_CV_STORAGE_PREFIX = 'cvision.lastOpenedCvId';
 
 function sanitizeFileNameSegment(value: string | null | undefined, fallback: string) {
   const sanitized = (value ?? '')
@@ -39,6 +40,46 @@ function sanitizeFileNameSegment(value: string | null | undefined, fallback: str
     .replace(/^_+|_+$/g, '');
 
   return sanitized || fallback;
+}
+
+function getLastOpenedCvStorageKey(userId: string) {
+  return `${LAST_OPENED_CV_STORAGE_PREFIX}.${userId}`;
+}
+
+function readLastOpenedCvId(userId: string | null | undefined) {
+  if (!userId || typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    return window.localStorage.getItem(getLastOpenedCvStorageKey(userId));
+  } catch {
+    return null;
+  }
+}
+
+function writeLastOpenedCvId(userId: string | null | undefined, cvId: string) {
+  if (!userId || typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(getLastOpenedCvStorageKey(userId), cvId);
+  } catch {
+    // Ignore storage failures so saving/opening CVs still works.
+  }
+}
+
+function clearLastOpenedCvId(userId: string | null | undefined) {
+  if (!userId || typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.removeItem(getLastOpenedCvStorageKey(userId));
+  } catch {
+    // Ignore storage failures so the editor remains usable.
+  }
 }
 
 interface ActiveCv {
@@ -173,6 +214,7 @@ export function DashboardPage() {
   const isDragging = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeCvId = searchParams.get('cvId');
+  const userId = user?.id ?? null;
 
   const yamlString = useMemo(() => {
     const doc = mapFormDataToRenderCvDoc(formData);
@@ -186,6 +228,17 @@ export function DashboardPage() {
 
     async function loadCvForEditing() {
       if (!activeCvId) {
+        const lastOpenedCvId = readLastOpenedCvId(userId);
+
+        if (lastOpenedCvId) {
+          setSearchParams((currentParams) => {
+            const nextParams = new URLSearchParams(currentParams);
+            nextParams.set('cvId', lastOpenedCvId);
+            return nextParams;
+          }, { replace: true });
+          return;
+        }
+
         setIsLoadingCv(true);
         toast.loading('Buscando tu CV más reciente...', { id: TOAST_IDS.loadingCv });
 
@@ -236,10 +289,24 @@ export function DashboardPage() {
 
         setActiveCv(payload.cv);
         setFormData(payload.snapshot);
+        writeLastOpenedCvId(userId, payload.cv.id);
         toast.dismiss(TOAST_IDS.loadError);
         toast(`Editando: ${payload.cv.title}`, { id: TOAST_IDS.editingCv });
       } catch {
         if (!ignore) {
+          if (activeCvId === readLastOpenedCvId(userId)) {
+            clearLastOpenedCvId(userId);
+            setActiveCv(null);
+            toast.dismiss(TOAST_IDS.editingCv);
+            toast.dismiss(TOAST_IDS.loadError);
+            setSearchParams((currentParams) => {
+              const nextParams = new URLSearchParams(currentParams);
+              nextParams.delete('cvId');
+              return nextParams;
+            }, { replace: true });
+            return;
+          }
+
           setActiveCv(null);
           toast.dismiss(TOAST_IDS.editingCv);
           toast.error('No pudimos cargar este CV para edición.', { id: TOAST_IDS.loadError });
@@ -258,7 +325,7 @@ export function DashboardPage() {
       ignore = true;
       toast.dismiss(TOAST_IDS.loadingCv);
     };
-  }, [activeCvId, setSearchParams]);
+  }, [activeCvId, setSearchParams, userId]);
 
   const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -332,6 +399,7 @@ export function DashboardPage() {
         });
 
         setActiveCv(createdCv);
+        writeLastOpenedCvId(userId, createdCv.id);
         setSearchParams((currentParams) => {
           const nextParams = new URLSearchParams(currentParams);
           nextParams.set('cvId', createdCv.id);
@@ -355,7 +423,7 @@ export function DashboardPage() {
         setIsSaving(false);
       }
     },
-    [cvTitle, formData, setSearchParams],
+    [cvTitle, formData, setSearchParams, userId],
   );
 
   const handleSaveChanges = useCallback(async () => {
