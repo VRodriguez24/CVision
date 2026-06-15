@@ -14,6 +14,7 @@ const envSchema = z.object({
   LOG_LEVEL: z.string().default('info'),
   GEMINI_API_KEY: z.string().optional(),
   AI_MODEL: z.string().default('gemini-2.5-flash'),
+  AI_IMPROVE_FIELD_MAX_OUTPUT_TOKENS: z.coerce.number().int().positive().default(4096),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

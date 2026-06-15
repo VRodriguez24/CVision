@@ -245,10 +245,11 @@ export async function improveField({ fieldPath, fieldLabel, text, selectedText, 
 
   const result = await createStructuredResponse({
     schema: fieldImprovementJsonSchema,
-    maxOutputTokens: 900,
+    maxOutputTokens: env.AI_IMPROVE_FIELD_MAX_OUTPUT_TOKENS,
     instructions: [
       'Eres un especialista en empleabilidad chilena, redacción profesional y CVs compatibles con ATS.',
       'Mejora solo el texto indicado, manteniendo idioma, veracidad, longitud razonable y formato de líneas cuando corresponda.',
+      'Prioriza completar improvedText; mantén explanation en una frase breve y atsNotes en máximo 3 notas cortas.',
       'No inventes cargos, empresas, fechas, métricas ni tecnologías no presentes.',
       'Devuelve JSON válido según el esquema solicitado.',
     ].join(' '),
