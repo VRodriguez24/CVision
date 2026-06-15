@@ -29,7 +29,7 @@ export const defaultSidebarItems = [
   { label: 'My CVs', to: '/dashboard/cvs', icon: 'cvs' },
   // { label: 'AI Optimizer', to: '/dashboard/optimizer', icon: 'optimizer' },
   // { label: 'Job Matches', to: '/dashboard/jobs', icon: 'jobs' },
-  { label: 'Settings', to: '/dashboard/settings', icon: 'settings' },
+  // { label: 'Settings', to: '/dashboard/settings', icon: 'settings' },
 ];
 
 const shortLabels = {
@@ -44,7 +44,7 @@ const shortLabels = {
 
 export const defaultSidebarSecondaryItems = [
   { label: 'Admin Panel', to: '/dashboard/admin', icon: 'admin' },
-  { label: 'Help Support', to: '/dashboard/help', icon: 'help' },
+  // { label: 'Help Support', to: '/dashboard/help', icon: 'help' },
 ];
 
 function BrandMark({ compact = false }) {
