@@ -11,7 +11,7 @@ import { useAuth } from '../../context/index.js';
 import { initialFormData } from './formData.js';
 import { mapFormDataToRenderCvDoc } from '../../adapters/mapFormDataToRenderCvDoc.js';
 import { analyzeCv, improveField, type AiCvAnalysis, type AiSuggestion } from '../../services/aiService.js';
-import { createCv, getCvById, updateCv } from '../../services/cvService.js';
+import { createCv, getCvById, listCvs, updateCv } from '../../services/cvService.js';
 import type { CvFormData } from '../../types/cvForm.js';
 
 const CV_TITLE_MAX_LENGTH = 160;
@@ -183,11 +183,42 @@ export function DashboardPage() {
 
     async function loadCvForEditing() {
       if (!activeCvId) {
-        if (!ignore) {
+        setIsLoadingCv(true);
+        toast.loading('Buscando tu CV más reciente...', { id: TOAST_IDS.loadingCv });
+
+        try {
+          const cvs = await listCvs();
+
+          if (ignore) return;
+
+          const latestCv = cvs[0];
+
+          if (latestCv) {
+            setSearchParams((currentParams) => {
+              const nextParams = new URLSearchParams(currentParams);
+              nextParams.set('cvId', latestCv.id);
+              return nextParams;
+            }, { replace: true });
+            toast.dismiss(TOAST_IDS.loadError);
+            return;
+          }
+
           setActiveCv(null);
-          setIsLoadingCv(false);
-          toast.dismiss(TOAST_IDS.loadingCv);
+          setFormData(initialFormData);
           toast.dismiss(TOAST_IDS.editingCv);
+          toast.dismiss(TOAST_IDS.loadError);
+        } catch {
+          if (!ignore) {
+            setActiveCv(null);
+            setFormData(initialFormData);
+            toast.dismiss(TOAST_IDS.editingCv);
+            toast.error('No pudimos cargar tus CVs guardados. Mostrando el template inicial.', { id: TOAST_IDS.loadError });
+          }
+        } finally {
+          if (!ignore) {
+            setIsLoadingCv(false);
+            toast.dismiss(TOAST_IDS.loadingCv);
+          }
         }
         return;
       }
@@ -224,7 +255,7 @@ export function DashboardPage() {
       ignore = true;
       toast.dismiss(TOAST_IDS.loadingCv);
     };
-  }, [activeCvId]);
+  }, [activeCvId, setSearchParams]);
 
   const onDividerMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -647,140 +678,140 @@ export function DashboardPage() {
             </div>
 
             <div className="space-y-5">
-            <section className="rounded border border-blue-100 bg-blue-50 p-4">
-              <h3 className="font-heading text-label-md font-semibold text-blue-900">Resumen</h3>
-              <p className="mt-2 text-sm text-blue-950">{analysisResult.summary}</p>
-            </section>
+              <section className="rounded border border-blue-100 bg-blue-50 p-4">
+                <h3 className="font-heading text-label-md font-semibold text-blue-900">Resumen</h3>
+                <p className="mt-2 text-sm text-blue-950">{analysisResult.summary}</p>
+              </section>
 
-            {analysisResult.keywords.length ? (
-              <section className="rounded border border-zinc-200 bg-white p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-heading text-label-md font-semibold text-primary">Keywords recomendadas</h3>
-                    <p className="mt-2 text-sm text-on-surface-variant">{analysisResult.keywords.join(', ')}</p>
+              {analysisResult.keywords.length ? (
+                <section className="rounded border border-zinc-200 bg-white p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-heading text-label-md font-semibold text-primary">Keywords recomendadas</h3>
+                      <p className="mt-2 text-sm text-on-surface-variant">{analysisResult.keywords.join(', ')}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAcceptKeywords}
+                      className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500"
+                    >
+                      Aceptar keywords
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleAcceptKeywords}
-                    className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500"
-                  >
-                    Aceptar keywords
-                  </button>
+                </section>
+              ) : null}
+
+              {analysisResult.inconsistencies.length || analysisResult.missingFields.length ? (
+                <section className="rounded border border-amber-200 bg-amber-50 p-4">
+                  <h3 className="font-heading text-label-md font-semibold text-amber-950">Alertas detectadas</h3>
+                  <ul className="mt-2 space-y-1 text-sm text-amber-950">
+                    {analysisResult.inconsistencies.map((item) => (
+                      <li key={`${item.fieldPath}-${item.message}`}>• {item.message} ({item.fieldPath})</li>
+                    ))}
+                    {analysisResult.missingFields.map((item) => (
+                      <li key={`${item.fieldPath}-${item.label}`}>• {item.label}: {item.reason}</li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              <section className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-heading text-label-md font-semibold text-primary">Sugerencias accionables</h3>
+                  <span className="text-xs text-on-surface-variant">{visibleSuggestions.length} pendientes</span>
                 </div>
-              </section>
-            ) : null}
 
-            {analysisResult.inconsistencies.length || analysisResult.missingFields.length ? (
-              <section className="rounded border border-amber-200 bg-amber-50 p-4">
-                <h3 className="font-heading text-label-md font-semibold text-amber-950">Alertas detectadas</h3>
-                <ul className="mt-2 space-y-1 text-sm text-amber-950">
-                  {analysisResult.inconsistencies.map((item) => (
-                    <li key={`${item.fieldPath}-${item.message}`}>• {item.message} ({item.fieldPath})</li>
-                  ))}
-                  {analysisResult.missingFields.map((item) => (
-                    <li key={`${item.fieldPath}-${item.label}`}>• {item.label}: {item.reason}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
+                {visibleSuggestions.length ? visibleSuggestions.map((suggestion) => {
+                  const isEditing = editingSuggestionId === suggestion.id;
 
-            <section className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-heading text-label-md font-semibold text-primary">Sugerencias accionables</h3>
-                <span className="text-xs text-on-surface-variant">{visibleSuggestions.length} pendientes</span>
-              </div>
-
-              {visibleSuggestions.length ? visibleSuggestions.map((suggestion) => {
-                const isEditing = editingSuggestionId === suggestion.id;
-
-                return (
-                  <article key={suggestion.id} className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="font-heading text-sm font-semibold text-primary">{suggestion.title}</h4>
-                          <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{getSuggestionTone(suggestion.category)}</span>
-                          <span className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700">{suggestion.severity}</span>
+                  return (
+                    <article key={suggestion.id} className="rounded border border-zinc-200 bg-white p-4 shadow-sm">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="font-heading text-sm font-semibold text-primary">{suggestion.title}</h4>
+                            <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{getSuggestionTone(suggestion.category)}</span>
+                            <span className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700">{suggestion.severity}</span>
+                          </div>
+                          <p className="mt-1 text-xs text-on-surface-variant">{suggestion.fieldPath}</p>
                         </div>
-                        <p className="mt-1 text-xs text-on-surface-variant">{suggestion.fieldPath}</p>
                       </div>
-                    </div>
 
-                    <p className="mt-3 text-sm text-on-surface-variant">{suggestion.rationale}</p>
-                    {suggestion.currentValue ? (
-                      <p className="mt-3 rounded bg-zinc-50 p-3 text-xs text-zinc-600">
-                        Actual: {suggestion.currentValue}
-                      </p>
-                    ) : null}
+                      <p className="mt-3 text-sm text-on-surface-variant">{suggestion.rationale}</p>
+                      {suggestion.currentValue ? (
+                        <p className="mt-3 rounded bg-zinc-50 p-3 text-xs text-zinc-600">
+                          Actual: {suggestion.currentValue}
+                        </p>
+                      ) : null}
 
-                    {isEditing ? (
-                      <textarea
-                        value={editedSuggestionValue}
-                        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setEditedSuggestionValue(event.target.value)}
-                        rows={4}
-                        className="mt-3 w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                      />
-                    ) : (
-                      <p className="mt-3 whitespace-pre-wrap rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-950">
-                        {suggestion.suggestedValue}
-                      </p>
-                    )}
-
-                    <div className="mt-4 flex flex-wrap justify-end gap-2">
                       {isEditing ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingSuggestionId(null);
-                              setEditedSuggestionValue('');
-                            }}
-                            className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-                          >
-                            Cancelar edición
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleAcceptSuggestion(suggestion, editedSuggestionValue)}
-                            className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500"
-                          >
-                            Aplicar edición
-                          </button>
-                        </>
+                        <textarea
+                          value={editedSuggestionValue}
+                          onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setEditedSuggestionValue(event.target.value)}
+                          rows={4}
+                          className="mt-3 w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+                        />
                       ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => handleRejectSuggestion(suggestion.id)}
-                            className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-                          >
-                            Rechazar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleStartEditSuggestion(suggestion)}
-                            className="rounded border border-blue-600 bg-white px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleAcceptSuggestion(suggestion)}
-                            className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500"
-                          >
-                            Aceptar
-                          </button>
-                        </>
+                        <p className="mt-3 whitespace-pre-wrap rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-950">
+                          {suggestion.suggestedValue}
+                        </p>
                       )}
-                    </div>
-                  </article>
-                );
-              }) : (
-                <p className="rounded border border-zinc-200 bg-white p-4 text-sm text-on-surface-variant">
-                  No quedan sugerencias pendientes.
-                </p>
-              )}
-            </section>
+
+                      <div className="mt-4 flex flex-wrap justify-end gap-2">
+                        {isEditing ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingSuggestionId(null);
+                                setEditedSuggestionValue('');
+                              }}
+                              className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                            >
+                              Cancelar edición
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAcceptSuggestion(suggestion, editedSuggestionValue)}
+                              className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500"
+                            >
+                              Aplicar edición
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleRejectSuggestion(suggestion.id)}
+                              className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                            >
+                              Rechazar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditSuggestion(suggestion)}
+                              className="rounded border border-blue-600 bg-white px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAcceptSuggestion(suggestion)}
+                              className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-500"
+                            >
+                              Aceptar
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </article>
+                  );
+                }) : (
+                  <p className="rounded border border-zinc-200 bg-white p-4 text-sm text-on-surface-variant">
+                    No quedan sugerencias pendientes.
+                  </p>
+                )}
+              </section>
             </div>
           </div>
         ) : null}

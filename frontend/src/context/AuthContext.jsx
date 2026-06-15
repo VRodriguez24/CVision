@@ -31,6 +31,7 @@ export function AuthProvider({ children }) {
 
   const clearSession = useCallback(() => {
     clearStoredSession();
+    setAccessTokenProvider(() => null);
     setSession({ accessToken: null, refreshToken: null });
     setUser(null);
     setStatus('anonymous');
@@ -81,6 +82,7 @@ export function AuthProvider({ children }) {
     };
 
     persistSession(nextSession);
+    setAccessTokenProvider(() => nextSession.accessToken);
     setSession(nextSession);
     setUser(authPayload.user);
     setStatus('authenticated');
