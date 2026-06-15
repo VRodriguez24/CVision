@@ -374,6 +374,43 @@ export function DashboardPage() {
     }
   }, [activeCv, formData, isSaving]);
 
+  useEffect(() => {
+    const handleSaveShortcut = (event: KeyboardEvent) => {
+      const isSaveShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's';
+
+      if (!isSaveShortcut) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (isSaving || isLoadingCv || isSaveModalOpen || isTargetRoleModalOpen) {
+        return;
+      }
+
+      if (activeCv) {
+        void handleSaveChanges();
+        return;
+      }
+
+      handleOpenSaveModal();
+    };
+
+    window.addEventListener('keydown', handleSaveShortcut);
+
+    return () => {
+      window.removeEventListener('keydown', handleSaveShortcut);
+    };
+  }, [
+    activeCv,
+    handleOpenSaveModal,
+    handleSaveChanges,
+    isLoadingCv,
+    isSaveModalOpen,
+    isSaving,
+    isTargetRoleModalOpen,
+  ]);
+
   const handleImproveField = useCallback(
     async ({ fieldLabel, fieldPath, selectionEnd, selectionStart, text }: ImproveFieldRequest) => {
       const selectedText = selectionStart !== null && selectionEnd !== null && selectionStart !== selectionEnd
