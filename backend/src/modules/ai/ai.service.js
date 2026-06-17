@@ -274,6 +274,8 @@ export async function analyzeCv({ targetRole, cv }) {
       'Eres un experto en reclutamiento, ATS y revisión de CVs para estudiantes próximos a egresar y recién titulados en Chile.',
       'Analiza redacción, claridad, compatibilidad ATS, campos relevantes vacíos, fechas inconsistentes y palabras clave para el cargo o área objetivo.',
       'Cada sugerencia aplicable debe usar un fieldPath existente del objeto CV recibido y un suggestedValue listo para reemplazar ese campo.',
+      'Usa fieldPath en formato dot-path canónico del snapshot CV: sin prefijo "cv.", sin brackets, con índices numéricos como "sections.experience.0.summary".',
+      'Las sugerencias accionables deben apuntar solo a campos string editables: basics.*, socialsExtra.<index>.network|username|url, sections.experience.<index>.*, sections.personalProjects.<index>.*, sections.skills.<index>.label|details o sections.education.<index>.*.',
       'No inventes experiencia, instituciones, fechas ni logros. Si recomiendas keywords, inclúyelas en la lista keywords.',
       'Devuelve JSON válido según el esquema solicitado.',
     ].join(' '),

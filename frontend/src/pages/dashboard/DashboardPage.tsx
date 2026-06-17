@@ -28,6 +28,21 @@ const FILE_NAME_INVALID_CHARACTERS = /[\\/:*?"<>|\u0000-\u001F]/g;
 const FILE_NAME_EXTRA_UNDERSCORES = /_+/g;
 const ATS_KEYWORDS_SKILL_LABEL = 'Palabras clave ATS';
 const LAST_OPENED_CV_STORAGE_PREFIX = 'cvision.lastOpenedCvId';
+const EDITABLE_BASIC_FIELDS = new Set(['name', 'headline', 'location', 'email', 'phone', 'website', 'linkedin', 'github']);
+const EDITABLE_SOCIAL_FIELDS = new Set(['network', 'username', 'url']);
+const EDITABLE_SECTION_FIELDS: Record<string, Set<string>> = {
+  experience: new Set(['company', 'position', 'location', 'date', 'summary', 'highlights']),
+  personalProjects: new Set(['name', 'detail', 'date', 'highlights']),
+  skills: new Set(['label', 'details']),
+  education: new Set(['institution', 'area', 'degree', 'location', 'date', 'summary']),
+};
+
+type SetStringAtPathResult = {
+  data: CvFormData;
+  applied: boolean;
+  normalizedPath: string;
+  reason?: string;
+};
 
 function sanitizeFileNameSegment(value: string | null | undefined, fallback: string) {
   const sanitized = (value ?? '')
@@ -102,11 +117,95 @@ function cloneContainer(value: unknown) {
   return Array.isArray(value) ? [...value] : { ...(value as Record<string, unknown>) };
 }
 
-function setStringAtPath(data: CvFormData, fieldPath: string, fieldValue: string) {
-  const pathParts = fieldPath.split('.').filter(Boolean);
+function isNonNegativeInteger(value: string) {
+  return /^\d+$/.test(value);
+}
+
+function normalizeFieldPath(fieldPath: string) {
+  const normalizedPath = fieldPath
+    .trim()
+    .replace(/^cv\./i, '')
+    .replace(/\[\s*(\d+)\s*\]/g, '.$1');
+  const pathParts = normalizedPath.split('.');
+
+  if (!normalizedPath || pathParts.some((pathPart) => !pathPart.trim())) {
+    return null;
+  }
+
+  return pathParts.map((pathPart) => pathPart.trim()).join('.');
+}
+
+function isEditableStringPath(pathParts: string[]) {
+  if (pathParts[0] === 'basics') {
+    return pathParts.length === 2 && EDITABLE_BASIC_FIELDS.has(pathParts[1]);
+  }
+
+  if (pathParts[0] === 'socialsExtra') {
+    return pathParts.length === 3 && isNonNegativeInteger(pathParts[1]) && EDITABLE_SOCIAL_FIELDS.has(pathParts[2]);
+  }
+
+  if (pathParts[0] === 'sections') {
+    const sectionFields = EDITABLE_SECTION_FIELDS[pathParts[1]];
+
+    return Boolean(
+      sectionFields &&
+      pathParts.length === 4 &&
+      isNonNegativeInteger(pathParts[2]) &&
+      sectionFields.has(pathParts[3]),
+    );
+  }
+
+  return false;
+}
+
+function getContainerValue(container: Record<string, unknown> | unknown[], key: string) {
+  if (Array.isArray(container)) {
+    const index = Number(key);
+
+    if (!Number.isInteger(index) || index < 0 || index >= container.length) {
+      return { exists: false, value: undefined };
+    }
+
+    return { exists: true, value: container[index] };
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(container, key)) {
+    return { exists: false, value: undefined };
+  }
+
+  return { exists: true, value: container[key] };
+}
+
+function trySetStringAtPath(data: CvFormData, fieldPath: string, fieldValue: string): SetStringAtPathResult {
+  const normalizedPath = normalizeFieldPath(fieldPath);
+
+  if (!normalizedPath) {
+    return {
+      data,
+      applied: false,
+      normalizedPath: '',
+      reason: 'No pudimos aplicar esta sugerencia porque la ruta del campo no es válida.',
+    };
+  }
+
+  const pathParts = normalizedPath.split('.');
 
   if (pathParts.length === 0) {
-    return data;
+    return {
+      data,
+      applied: false,
+      normalizedPath,
+      reason: 'No pudimos aplicar esta sugerencia porque la ruta del campo no es válida.',
+    };
+  }
+
+  if (!isEditableStringPath(pathParts)) {
+    return {
+      data,
+      applied: false,
+      normalizedPath,
+      reason: 'No pudimos aplicar esta sugerencia porque apunta a un campo no editable del CV.',
+    };
   }
 
   const nextData = cloneContainer(data) as unknown as CvFormData;
@@ -116,10 +215,15 @@ function setStringAtPath(data: CvFormData, fieldPath: string, fieldValue: string
   for (let index = 0; index < pathParts.length - 1; index += 1) {
     const key = pathParts[index];
     const sourceContainer = currentSource as Record<string, unknown> | unknown[];
-    const sourceValue = Array.isArray(sourceContainer) ? sourceContainer[Number(key)] : sourceContainer[key];
+    const { exists, value: sourceValue } = getContainerValue(sourceContainer, key);
 
-    if (sourceValue === null || typeof sourceValue !== 'object') {
-      return data;
+    if (!exists || sourceValue === null || typeof sourceValue !== 'object') {
+      return {
+        data,
+        applied: false,
+        normalizedPath,
+        reason: 'No pudimos aplicar esta sugerencia porque el campo ya no existe en el CV.',
+      };
     }
 
     const copiedValue = cloneContainer(sourceValue);
@@ -136,10 +240,15 @@ function setStringAtPath(data: CvFormData, fieldPath: string, fieldValue: string
 
   const lastKey = pathParts[pathParts.length - 1];
   const sourceContainer = currentSource as Record<string, unknown> | unknown[];
-  const currentValue = Array.isArray(sourceContainer) ? sourceContainer[Number(lastKey)] : sourceContainer[lastKey];
+  const { exists, value: currentValue } = getContainerValue(sourceContainer, lastKey);
 
-  if (typeof currentValue !== 'string') {
-    return data;
+  if (!exists || typeof currentValue !== 'string') {
+    return {
+      data,
+      applied: false,
+      normalizedPath,
+      reason: 'No pudimos aplicar esta sugerencia porque el campo no contiene texto editable.',
+    };
   }
 
   if (Array.isArray(currentCopy)) {
@@ -148,7 +257,15 @@ function setStringAtPath(data: CvFormData, fieldPath: string, fieldValue: string
     currentCopy[lastKey] = fieldValue;
   }
 
-  return nextData;
+  return {
+    data: nextData,
+    applied: true,
+    normalizedPath,
+  };
+}
+
+function setStringAtPath(data: CvFormData, fieldPath: string, fieldValue: string) {
+  return trySetStringAtPath(data, fieldPath, fieldValue).data;
 }
 
 function upsertAtsKeywordsSkill(data: CvFormData, keywords: string[]) {
@@ -566,20 +683,30 @@ export function DashboardPage() {
     [formData, targetRole],
   );
 
-  const handleAcceptSuggestion = useCallback((suggestion: AiSuggestion, overrideValue?: string) => {
-    const nextValue = overrideValue ?? suggestion.suggestedValue;
+  const handleAcceptSuggestion = useCallback(
+    (suggestion: AiSuggestion, overrideValue?: string) => {
+      const nextValue = overrideValue ?? suggestion.suggestedValue;
 
-    if (!nextValue.trim()) {
-      toast.error('La sugerencia no contiene texto aplicable.');
-      return;
-    }
+      if (!nextValue.trim()) {
+        toast.error('La sugerencia no contiene texto aplicable.');
+        return;
+      }
 
-    setFormData((currentData) => setStringAtPath(currentData, suggestion.fieldPath, nextValue));
-    setDismissedSuggestionIds((currentIds) => [...currentIds, suggestion.id]);
-    setEditingSuggestionId(null);
-    setEditedSuggestionValue('');
-    toast.success('Sugerencia aplicada al CV.');
-  }, []);
+      const applyResult = trySetStringAtPath(formData, suggestion.fieldPath, nextValue);
+
+      if (!applyResult.applied) {
+        toast.error(applyResult.reason ?? 'No pudimos aplicar esta sugerencia al CV.');
+        return;
+      }
+
+      setFormData(applyResult.data);
+      setDismissedSuggestionIds((currentIds) => [...currentIds, suggestion.id]);
+      setEditingSuggestionId(null);
+      setEditedSuggestionValue('');
+      toast.success('Sugerencia aplicada al CV.');
+    },
+    [formData],
+  );
 
   const handleRejectSuggestion = useCallback((suggestionId: string) => {
     setDismissedSuggestionIds((currentIds) => [...currentIds, suggestionId]);
